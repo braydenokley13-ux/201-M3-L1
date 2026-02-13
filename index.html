@@ -1,0 +1,1688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Front Office Dashboard | Data to Decisions</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #111827;
+            --bg-card: rgba(15, 23, 42, 0.85);
+            --bg-card-hover: rgba(25, 35, 60, 0.9);
+            --border: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(255, 255, 255, 0.15);
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --text-dim: #64748b;
+            --accent-blue: #00d4ff;
+            --accent-green: #00ff88;
+            --accent-amber: #ffaa00;
+            --accent-red: #ff3355;
+            --accent-gold: #ffd700;
+            --accent-purple: #a855f7;
+            --elite-glow: rgba(255, 215, 0, 0.15);
+            --value-glow: rgba(0, 212, 255, 0.15);
+            --trap-glow: rgba(255, 51, 85, 0.15);
+            --gem-glow: rgba(0, 255, 136, 0.15);
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ===== HEADER ===== */
+        .game-header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 20px 24px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .game-header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(ellipse at 50% 0%, rgba(0, 212, 255, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .header-badge {
+            display: inline-block;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 20px;
+            padding: 4px 14px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--accent-blue);
+            margin-bottom: 10px;
+        }
+        .header-title {
+            font-size: clamp(22px, 4vw, 36px);
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #fff 0%, var(--accent-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 6px;
+        }
+        .header-subtitle {
+            color: var(--text-secondary);
+            font-size: 14px;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+        .header-subtitle strong { color: var(--accent-amber); }
+
+        /* ===== DASHBOARD (sticky) ===== */
+        .dashboard {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(10, 14, 23, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 20px;
+        }
+        .dash-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        .budget-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .budget-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+        .budget-bar-wrap {
+            width: 180px;
+            height: 8px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .budget-bar {
+            height: 100%;
+            border-radius: 4px;
+            background: var(--accent-green);
+            transition: width 0.5s ease, background 0.3s ease;
+            width: 0%;
+        }
+        .budget-text {
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--accent-green);
+            transition: color 0.3s ease;
+            min-width: 110px;
+            text-align: right;
+        }
+        .roster-count {
+            font-size: 13px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .roster-count strong {
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            color: var(--accent-blue);
+            font-size: 16px;
+        }
+        .owner-mood {
+            font-size: 28px;
+            transition: transform 0.3s ease;
+            cursor: help;
+            position: relative;
+        }
+        .owner-mood:hover::after {
+            content: attr(data-tip);
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            background: var(--bg-secondary);
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        .dash-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 8px;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 8px 12px;
+            text-align: center;
+            transition: border-color 0.3s ease;
+        }
+        .stat-card .stat-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-dim);
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        .stat-card .stat-value {
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            transition: color 0.3s ease;
+        }
+        .stat-card .stat-sub {
+            font-size: 10px;
+            color: var(--text-dim);
+            margin-top: 1px;
+        }
+        .info-btn {
+            background: none;
+            border: 1px solid var(--text-dim);
+            color: var(--text-dim);
+            border-radius: 50%;
+            width: 14px;
+            height: 14px;
+            font-size: 9px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            padding: 0;
+            line-height: 1;
+        }
+        .info-btn:hover {
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+
+        /* Efficiency Bar */
+        .efficiency-section {
+            margin-top: 10px;
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+        .eff-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .eff-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+        .eff-score {
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 22px;
+            font-weight: 800;
+        }
+        .eff-bar-wrap {
+            height: 10px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+        }
+        .eff-bar-bg {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(90deg, var(--accent-red) 0%, var(--accent-amber) 40%, var(--accent-green) 75%);
+            opacity: 0.15;
+            border-radius: 5px;
+        }
+        .eff-bar {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 0.6s ease, background 0.3s ease;
+            width: 0%;
+            position: relative;
+            z-index: 1;
+        }
+        .eff-zones {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 4px;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .eff-zones span:nth-child(1) { color: var(--accent-red); }
+        .eff-zones span:nth-child(2) { color: var(--accent-amber); }
+        .eff-zones span:nth-child(3) { color: var(--accent-green); }
+
+        /* ===== CONTROLS ===== */
+        .controls {
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-primary);
+        }
+        .sort-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .sort-label {
+            font-size: 12px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .sort-btn {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            border-radius: 6px;
+            padding: 5px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        .sort-btn:hover, .sort-btn.active {
+            background: rgba(0, 212, 255, 0.1);
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+        .reset-btn {
+            background: rgba(255, 51, 85, 0.1);
+            border: 1px solid rgba(255, 51, 85, 0.3);
+            color: var(--accent-red);
+            border-radius: 8px;
+            padding: 6px 16px;
+            font-size: 13px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        .reset-btn:hover {
+            background: rgba(255, 51, 85, 0.2);
+            border-color: var(--accent-red);
+        }
+
+        /* ===== PLAYER GRID ===== */
+        .player-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .player-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .player-card:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+        }
+        .player-card.selected {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 24px rgba(0, 212, 255, 0.2), inset 0 0 20px rgba(0, 212, 255, 0.03);
+        }
+        .player-card.selected .card-select-indicator {
+            background: var(--accent-blue);
+            border-color: var(--accent-blue);
+        }
+        .player-card.selected .card-select-indicator::after {
+            content: '✓';
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .player-card.disabled {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .card-tier-accent {
+            height: 3px;
+            width: 100%;
+        }
+        .tier-elite .card-tier-accent { background: linear-gradient(90deg, var(--accent-gold), var(--accent-amber)); }
+        .tier-value .card-tier-accent { background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple)); }
+        .tier-trap .card-tier-accent { background: linear-gradient(90deg, var(--accent-red), #ff6b6b); }
+        .tier-gem .card-tier-accent { background: linear-gradient(90deg, var(--accent-green), #00cc6a); }
+
+        .card-body {
+            padding: 14px 16px;
+        }
+        .card-top {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .card-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 16px;
+            color: #fff;
+            flex-shrink: 0;
+            letter-spacing: -0.5px;
+        }
+        .tier-elite .card-avatar { background: linear-gradient(135deg, #b8860b, #ffd700); }
+        .tier-value .card-avatar { background: linear-gradient(135deg, #0077b6, #00d4ff); }
+        .tier-trap .card-avatar { background: linear-gradient(135deg, #cc2244, #ff3355); }
+        .tier-gem .card-avatar { background: linear-gradient(135deg, #00994d, #00ff88); }
+
+        .card-name-block { flex: 1; min-width: 0; }
+        .card-name {
+            font-size: 16px;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .card-meta {
+            font-size: 12px;
+            color: var(--text-dim);
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-top: 2px;
+        }
+        .card-meta .pos-badge {
+            background: rgba(255,255,255,0.06);
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 11px;
+        }
+        .card-select-indicator {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--text-dim);
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+
+        .card-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+        .card-stat {
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            padding: 6px 8px;
+            text-align: center;
+        }
+        .card-stat-label {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-dim);
+            margin-bottom: 2px;
+        }
+        .card-stat-value {
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .card-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-cpw {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+        }
+        .cpw-green { background: rgba(0,255,136,0.12); color: var(--accent-green); }
+        .cpw-yellow { background: rgba(255,170,0,0.12); color: var(--accent-amber); }
+        .cpw-red { background: rgba(255,51,85,0.12); color: var(--accent-red); }
+
+        .card-stars {
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+        .star-filled { color: var(--accent-gold); }
+        .star-empty { color: var(--text-dim); opacity: 0.3; }
+
+        .card-scout {
+            font-size: 11px;
+            color: var(--text-dim);
+            line-height: 1.4;
+            font-style: italic;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid var(--border);
+        }
+
+        /* ===== MODALS ===== */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(8px);
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            max-width: 520px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 28px;
+            position: relative;
+            animation: modalIn 0.3s ease;
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .modal-close {
+            position: absolute;
+            top: 12px;
+            right: 14px;
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            font-size: 22px;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .modal-close:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); }
+        .modal h2 {
+            font-size: 20px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .modal p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.7;
+            margin-bottom: 12px;
+        }
+        .modal p strong { color: var(--accent-blue); }
+        .modal .formula {
+            background: rgba(0, 212, 255, 0.06);
+            border: 1px solid rgba(0, 212, 255, 0.15);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 13px;
+            color: var(--accent-blue);
+            margin: 10px 0;
+        }
+
+        /* Win Modal special */
+        .win-modal .modal {
+            text-align: center;
+            border-color: rgba(0, 255, 136, 0.3);
+            box-shadow: 0 0 60px rgba(0, 255, 136, 0.1);
+        }
+        .win-modal .win-score {
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 64px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 12px 0;
+        }
+        .win-modal .win-zone {
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+        }
+        .zone-green { background: rgba(0,255,136,0.15); color: var(--accent-green); border: 1px solid rgba(0,255,136,0.3); }
+        .zone-yellow { background: rgba(255,170,0,0.15); color: var(--accent-amber); border: 1px solid rgba(255,170,0,0.3); }
+        .zone-red { background: rgba(255,51,85,0.15); color: var(--accent-red); border: 1px solid rgba(255,51,85,0.3); }
+
+        .win-modal .claim-code {
+            background: linear-gradient(135deg, rgba(0,255,136,0.1), rgba(0,212,255,0.1));
+            border: 2px dashed var(--accent-green);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 16px 0;
+        }
+        .win-modal .claim-code .code-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+        .win-modal .claim-code .code-value {
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--accent-green);
+            letter-spacing: 3px;
+        }
+        .score-breakdown {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 8px;
+            margin: 16px 0;
+            text-align: center;
+        }
+        .breakdown-item {
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            padding: 10px;
+        }
+        .breakdown-item .bd-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-dim);
+            margin-bottom: 4px;
+        }
+        .breakdown-item .bd-value {
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 20px;
+            font-weight: 700;
+        }
+        .breakdown-item .bd-bar {
+            height: 4px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 2px;
+            margin-top: 6px;
+            overflow: hidden;
+        }
+        .breakdown-item .bd-bar-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.8s ease;
+        }
+        .win-modal .win-message {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-top: 12px;
+        }
+        .win-modal .lesson-callouts {
+            text-align: left;
+            margin-top: 16px;
+        }
+        .lesson-callout {
+            background: rgba(255,255,255,0.03);
+            border-left: 3px solid var(--accent-blue);
+            border-radius: 0 8px 8px 0;
+            padding: 10px 14px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+        .lesson-callout strong { color: var(--accent-blue); }
+
+        .try-again-btn {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            border: none;
+            color: #fff;
+            padding: 10px 28px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 14px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-family: inherit;
+        }
+        .try-again-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(0, 212, 255, 0.3);
+        }
+
+        /* Confetti */
+        .confetti-piece {
+            position: fixed;
+            z-index: 2000;
+            pointer-events: none;
+            border-radius: 2px;
+            animation: confettiFall linear forwards;
+        }
+        @keyframes confettiFall {
+            0% { opacity: 1; transform: translateY(0) rotate(0deg); }
+            100% { opacity: 0; transform: translateY(100vh) rotate(720deg); }
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-size: 14px;
+            color: var(--text-primary);
+            z-index: 500;
+            opacity: 0;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Intro overlay */
+        .intro-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(10, 14, 23, 0.97);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .intro-overlay.hidden { display: none; }
+        .intro-card {
+            max-width: 560px;
+            text-align: center;
+            animation: modalIn 0.5s ease;
+        }
+        .intro-card .intro-icon {
+            font-size: 56px;
+            margin-bottom: 16px;
+        }
+        .intro-card h1 {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #fff, var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .intro-card .intro-sub {
+            color: var(--accent-amber);
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+        .intro-card p {
+            color: var(--text-secondary);
+            font-size: 15px;
+            line-height: 1.7;
+            margin-bottom: 12px;
+        }
+        .intro-card .intro-rules {
+            text-align: left;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin: 16px 0;
+        }
+        .intro-card .intro-rules li {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 8px;
+            padding-left: 8px;
+            line-height: 1.5;
+        }
+        .intro-card .intro-rules li strong { color: var(--text-primary); }
+        .start-btn {
+            background: linear-gradient(135deg, var(--accent-green), #00cc6a);
+            border: none;
+            color: #0a0e17;
+            padding: 14px 48px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.2s;
+            margin-top: 8px;
+            font-family: inherit;
+        }
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(0, 255, 136, 0.3);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .game-header { padding: 16px; }
+            .dashboard { padding: 10px 12px; }
+            .dash-stats { grid-template-columns: repeat(3, 1fr); }
+            .stat-card .stat-value { font-size: 15px; }
+            .player-grid { grid-template-columns: 1fr; padding: 12px; gap: 12px; }
+            .controls { padding: 10px 12px; }
+            .budget-bar-wrap { width: 120px; }
+            .sort-btn { padding: 4px 8px; font-size: 11px; }
+        }
+        @media (max-width: 480px) {
+            .dash-stats { grid-template-columns: repeat(2, 1fr); }
+            .card-stats { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        /* Pulse animation for score changes */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+        .pulse { animation: pulse 0.3s ease; }
+
+        /* Shimmer for selected card */
+        @keyframes shimmer {
+            0% { background-position: -200% center; }
+            100% { background-position: 200% center; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== INTRO OVERLAY ===== -->
+<div class="intro-overlay" id="introOverlay">
+    <div class="intro-card">
+        <div class="intro-icon">&#9918;</div>
+        <h1>The Front Office Dashboard</h1>
+        <div class="intro-sub">BOW Sports Capital &mdash; Module 3, Lesson 1</div>
+        <p>You've just been hired as the GM of an expansion franchise. Your job: build a championship-caliber roster through free agency.</p>
+        <p>But you can't just buy the biggest names. You need to balance <strong style="color: var(--accent-blue);">production</strong>, <strong style="color: var(--accent-green);">value</strong>, <strong style="color: var(--accent-amber);">risk</strong>, and <strong style="color: var(--accent-red);">cost</strong> &mdash; just like a real front office.</p>
+        <ul class="intro-rules">
+            <li><strong>Select 9 players</strong> to fill your roster</li>
+            <li><strong>Stay under $200M</strong> salary cap</li>
+            <li><strong>Maximize your Efficiency Score</strong> &mdash; it measures WAR, value, risk, age, and chemistry</li>
+            <li><strong>Hit the Green Zone (75+)</strong> to prove you can run a front office and unlock your claim code</li>
+        </ul>
+        <p style="font-size: 13px; color: var(--text-dim);">Tip: The most famous player isn't always the smartest signing. Think like a GM, not a fan.</p>
+        <button class="start-btn" onclick="startGame()">Enter the War Room</button>
+    </div>
+</div>
+
+<!-- ===== HEADER ===== -->
+<header class="game-header">
+    <div class="header-badge">Track 201 &middot; Module 3 &middot; Lesson 1</div>
+    <h1 class="header-title">The Front Office Dashboard</h1>
+    <p class="header-subtitle">Build the most efficient roster. Balance WAR, cost, risk, and upside. Hit the <strong>Green Zone</strong> to prove you can run a front office.</p>
+</header>
+
+<!-- ===== DASHBOARD ===== -->
+<section class="dashboard" id="dashboard">
+    <div class="dash-top">
+        <div class="budget-section">
+            <span class="budget-label">Budget</span>
+            <div class="budget-bar-wrap"><div class="budget-bar" id="budgetBar"></div></div>
+            <span class="budget-text" id="budgetText">$0M / $200M</span>
+        </div>
+        <div style="display:flex; align-items:center; gap: 16px;">
+            <div class="roster-count">Roster: <strong id="rosterCount">0</strong>/9</div>
+            <div class="owner-mood" id="ownerMood" data-tip="Owner is waiting...">&#128528;</div>
+        </div>
+    </div>
+
+    <div class="dash-stats">
+        <div class="stat-card">
+            <div class="stat-label">Total WAR <button class="info-btn" onclick="showInfo('war')">?</button></div>
+            <div class="stat-value" id="statWAR">0.0</div>
+            <div class="stat-sub">Wins Above Replacement</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Adj. WAR <button class="info-btn" onclick="showInfo('adjwar')">?</button></div>
+            <div class="stat-value" id="statAdjWAR">0.0</div>
+            <div class="stat-sub">Expected value WAR</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">$/WAR <button class="info-btn" onclick="showInfo('cpw')">?</button></div>
+            <div class="stat-value" id="statCPW">&mdash;</div>
+            <div class="stat-sub">Cost per win</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Avg Age <button class="info-btn" onclick="showInfo('age')">?</button></div>
+            <div class="stat-value" id="statAge">&mdash;</div>
+            <div class="stat-sub">Age curve position</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Avg Risk <button class="info-btn" onclick="showInfo('risk')">?</button></div>
+            <div class="stat-value" id="statRisk">&mdash;</div>
+            <div class="stat-sub">Injury probability</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Fan Appeal <button class="info-btn" onclick="showInfo('fan')">?</button></div>
+            <div class="stat-value" id="statFan">&mdash;</div>
+            <div class="stat-sub">Star power</div>
+        </div>
+    </div>
+
+    <div class="efficiency-section">
+        <div class="eff-header">
+            <span class="eff-label">Efficiency Score <button class="info-btn" onclick="showInfo('efficiency')">?</button></span>
+            <span class="eff-score" id="effScore" style="color: var(--text-dim);">0</span>
+        </div>
+        <div class="eff-bar-wrap">
+            <div class="eff-bar-bg"></div>
+            <div class="eff-bar" id="effBar"></div>
+        </div>
+        <div class="eff-zones">
+            <span>Red Zone (0-59)</span>
+            <span>Yellow Zone (60-74)</span>
+            <span>Green Zone (75+)</span>
+        </div>
+    </div>
+</section>
+
+<!-- ===== CONTROLS ===== -->
+<div class="controls">
+    <div class="sort-group">
+        <span class="sort-label">Sort:</span>
+        <button class="sort-btn active" data-sort="default" onclick="sortPlayers('default', this)">Tier</button>
+        <button class="sort-btn" data-sort="war" onclick="sortPlayers('war', this)">WAR</button>
+        <button class="sort-btn" data-sort="salary" onclick="sortPlayers('salary', this)">Salary</button>
+        <button class="sort-btn" data-sort="age" onclick="sortPlayers('age', this)">Age</button>
+        <button class="sort-btn" data-sort="cpw" onclick="sortPlayers('cpw', this)">$/WAR</button>
+        <button class="sort-btn" data-sort="fan" onclick="sortPlayers('fan', this)">Fan Appeal</button>
+    </div>
+    <button class="reset-btn" onclick="resetGame()">Reset Roster</button>
+</div>
+
+<!-- ===== PLAYER GRID ===== -->
+<div class="player-grid" id="playerGrid"></div>
+
+<!-- ===== INFO MODAL ===== -->
+<div class="modal-overlay" id="infoModal">
+    <div class="modal">
+        <button class="modal-close" onclick="closeInfo()">&times;</button>
+        <div id="infoContent"></div>
+    </div>
+</div>
+
+<!-- ===== WIN/RESULT MODAL ===== -->
+<div class="modal-overlay win-modal" id="resultModal">
+    <div class="modal">
+        <button class="modal-close" onclick="closeResult()">&times;</button>
+        <div id="resultContent"></div>
+    </div>
+</div>
+
+<!-- ===== TOAST ===== -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ========================================
+// PLAYER DATA — 20 Real MLB Free Agents
+// ========================================
+const PLAYERS = [
+    // ELITE TIER
+    {
+        id: 1, name: "Shohei Ohtani", position: "DH/P", age: 29,
+        war: 8.5, salary: 65.0, contractYears: 10, injuryRisk: 20, fanAppeal: 5,
+        tier: "elite", tierOrder: 0,
+        scout: "Generational two-way talent. Deferred salary helps, but the elbow history is real. The upside? There's nobody like him on Earth."
+    },
+    {
+        id: 2, name: "Aaron Judge", position: "OF", age: 32,
+        war: 7.0, salary: 40.0, contractYears: 5, injuryRisk: 30, fanAppeal: 5,
+        tier: "elite", tierOrder: 1,
+        scout: "6'7\" of raw power. MVP caliber when healthy — but that's the gamble. His size and age make durability a real question mark."
+    },
+    {
+        id: 3, name: "Juan Soto", position: "OF", age: 26,
+        war: 7.5, salary: 51.0, contractYears: 15, injuryRisk: 10, fanAppeal: 4,
+        tier: "elite", tierOrder: 2,
+        scout: "Elite plate discipline since age 19. Low risk, young, proven. The mega-contract eats cap space, but this is as safe as stars get."
+    },
+    {
+        id: 4, name: "Bobby Witt Jr.", position: "SS", age: 24,
+        war: 8.0, salary: 28.0, contractYears: 7, injuryRisk: 10, fanAppeal: 4,
+        tier: "elite", tierOrder: 3,
+        scout: "Five-tool superstar entering his prime. The rare case where the star IS the value pick. Elite production at a below-market price."
+    },
+    // VALUE TIER
+    {
+        id: 5, name: "Gunnar Henderson", position: "SS/3B", age: 23,
+        war: 6.5, salary: 15.0, contractYears: 6, injuryRisk: 10, fanAppeal: 3,
+        tier: "value", tierOrder: 4,
+        scout: "Pre-arb stud with MVP-caliber upside. At $15M, you're getting $50M+ worth of production. Textbook front-office win."
+    },
+    {
+        id: 6, name: "Corbin Carroll", position: "OF", age: 24,
+        war: 5.0, salary: 10.0, contractYears: 6, injuryRisk: 15, fanAppeal: 3,
+        tier: "value", tierOrder: 5,
+        scout: "Elite speed, solid bat, developing power. His youth and controlled cost make him exactly the type of asset smart teams hoard."
+    },
+    {
+        id: 7, name: "Elly De La Cruz", position: "SS", age: 22,
+        war: 5.5, salary: 8.0, contractYears: 6, injuryRisk: 15, fanAppeal: 4,
+        tier: "value", tierOrder: 6,
+        scout: "The most electric athlete in baseball. 100 mph exit velos, 30 steals, highlight-reel defense. Strikeouts are the only question."
+    },
+    {
+        id: 8, name: "Julio Rodriguez", position: "OF", age: 23,
+        war: 5.0, salary: 14.0, contractYears: 8, injuryRisk: 15, fanAppeal: 4,
+        tier: "value", tierOrder: 7,
+        scout: "Locked into a team-friendly extension. Five-tool talent with star charisma. The long-term control is the real asset here."
+    },
+    {
+        id: 9, name: "Seth Lugo", position: "SP", age: 35,
+        war: 4.5, salary: 15.0, contractYears: 2, injuryRisk: 20, fanAppeal: 2,
+        tier: "value", tierOrder: 8,
+        scout: "Late bloomer putting up ace numbers. The age scares people off, which is exactly why the price is right. Short-term value play."
+    },
+    {
+        id: 10, name: "Cal Raleigh", position: "C", age: 28,
+        war: 5.5, salary: 17.5, contractYears: 6, injuryRisk: 10, fanAppeal: 3,
+        tier: "value", tierOrder: 9,
+        scout: "Elite defensive catcher with 30-HR power. The catching position is so thin that his value per dollar is off the charts."
+    },
+    // TRAP TIER
+    {
+        id: 11, name: "Mookie Betts", position: "SS/OF", age: 32,
+        war: 4.0, salary: 30.5, contractYears: 5, injuryRisk: 25, fanAppeal: 4,
+        tier: "trap", tierOrder: 10,
+        scout: "Former MVP still producing — but at $30M for 4 WAR, you're paying for the brand, not the bargain. The jersey sells. The analytics say 'pass.'"
+    },
+    {
+        id: 12, name: "Trea Turner", position: "SS", age: 31,
+        war: 3.0, salary: 27.0, contractYears: 7, injuryRisk: 30, fanAppeal: 3,
+        tier: "trap", tierOrder: 11,
+        scout: "Speed is the first tool to go, and the hamstrings are a recurring nightmare. Seven years left on this deal. The definition of albatross risk."
+    },
+    {
+        id: 13, name: "Carlos Correa", position: "SS", age: 30,
+        war: 3.5, salary: 33.0, contractYears: 8, injuryRisk: 35, fanAppeal: 3,
+        tier: "trap", tierOrder: 12,
+        scout: "Talented but fragile. The back issues are chronic, not acute. At $33M/yr with 8 years left, this contract could cripple your cap flexibility."
+    },
+    {
+        id: 14, name: "Max Scherzer", position: "SP", age: 40,
+        war: 2.0, salary: 22.0, contractYears: 1, injuryRisk: 45, fanAppeal: 3,
+        tier: "trap", tierOrder: 13,
+        scout: "Hall of Fame arm, but Father Time is undefeated. $11M per WAR with a coin-flip chance of even pitching. A nostalgia signing, not a smart one."
+    },
+    {
+        id: 15, name: "Justin Verlander", position: "SP", age: 41,
+        war: 1.5, salary: 25.0, contractYears: 1, injuryRisk: 50, fanAppeal: 3,
+        tier: "trap", tierOrder: 14,
+        scout: "Living legend — but $16.7M per WAR is the worst rate on this board. You're paying for the Hall of Fame plaque, not next season's wins."
+    },
+    // HIDDEN GEM TIER
+    {
+        id: 16, name: "Ezequiel Tovar", position: "SS", age: 23,
+        war: 4.5, salary: 5.0, contractYears: 6, injuryRisk: 10, fanAppeal: 2,
+        tier: "gem", tierOrder: 15,
+        scout: "Nobody outside Colorado talks about him — and that's your edge. $1.1M per WAR is absurd value. The Moneyball pick of this board."
+    },
+    {
+        id: 17, name: "Jarren Duran", position: "OF", age: 28,
+        war: 4.0, salary: 6.0, contractYears: 4, injuryRisk: 10, fanAppeal: 2,
+        tier: "gem", tierOrder: 16,
+        scout: "Breakout 2024 All-Star nobody saw coming. At $6M, he's a rounding error on your payroll but a real contributor on your roster."
+    },
+    {
+        id: 18, name: "Paul Skenes", position: "SP", age: 23,
+        war: 5.5, salary: 3.0, contractYears: 6, injuryRisk: 15, fanAppeal: 4,
+        tier: "gem", tierOrder: 17,
+        scout: "Rookie phenom with a 100-mph fastball and a sweeper that breaks bats. At $3M, this is the single best value on the entire board."
+    },
+    {
+        id: 19, name: "Cristopher Sanchez", position: "SP", age: 28,
+        war: 5.0, salary: 4.0, contractYears: 5, injuryRisk: 10, fanAppeal: 2,
+        tier: "gem", tierOrder: 18,
+        scout: "Ace production at a relief pitcher's salary. Nobody's heard of him, which is exactly why you can afford him. Pure analytics play."
+    },
+    {
+        id: 20, name: "Luis Arraez", position: "1B/2B", age: 27,
+        war: 3.5, salary: 12.0, contractYears: 5, injuryRisk: 10, fanAppeal: 2,
+        tier: "gem", tierOrder: 19,
+        scout: "Three batting titles by age 27. Doesn't hit homers, doesn't make SportsCenter — but puts the bat on the ball better than anyone alive."
+    }
+];
+
+// ========================================
+// INFO CONTENT
+// ========================================
+const INFO = {
+    war: {
+        title: "&#9918; WAR — Wins Above Replacement",
+        body: `<p><strong>WAR</strong> measures how many additional wins a player contributes compared to a freely available minor-league replacement player.</p>
+        <p>Think of it as one number that captures a player's total value — offense, defense, baserunning — rolled into a single stat.</p>
+        <div class="formula">2 WAR = Average starter<br>4-5 WAR = All-Star level<br>7+ WAR = MVP candidate<br>10+ WAR = Historic season</div>
+        <p>WAR isn't perfect — it doesn't capture leadership, clubhouse presence, or clutch performance. But it's the closest thing to a "total value" number in baseball.</p>
+        <p>In this game, your <strong>Total WAR</strong> represents your roster's raw talent level. Aim for <strong>35-45 combined WAR</strong> for a playoff-caliber team.</p>`
+    },
+    adjwar: {
+        title: "&#128202; Adjusted WAR — Expected Value",
+        body: `<p><strong>Adjusted WAR</strong> is each player's WAR multiplied by the probability they actually stay healthy and play.</p>
+        <div class="formula">Adjusted WAR = WAR &times; (1 - Injury Risk %)</div>
+        <p>This is <strong>expected value</strong> in action — the same concept from Module 2's Player Economics lessons.</p>
+        <p>Example: Aaron Judge projects for <strong>7.0 WAR</strong>, but his injury risk is <strong>30%</strong>. His expected (adjusted) WAR is only <strong>4.9</strong>.</p>
+        <p>Meanwhile, Bobby Witt Jr. projects <strong>8.0 WAR</strong> with just <strong>10% injury risk</strong> = <strong>7.2 adjusted WAR</strong>. That's 47% more expected production.</p>
+        <p>Smart front offices don't bet on best-case scenarios. They plan for <strong>expected outcomes</strong>.</p>`
+    },
+    cpw: {
+        title: "&#128176; $/WAR — Cost Per Win",
+        body: `<p><strong>Cost per WAR</strong> tells you how many million dollars you're paying for each win a player adds. It's the core Moneyball insight.</p>
+        <div class="formula">$/WAR = Annual Salary &divide; Projected WAR<br><br>Market rate: ~$8-10M per WAR<br>Bargain: Under $5M/WAR<br>Overpaying: Over $10M/WAR</div>
+        <p>Example: Justin Verlander at <strong>$25M for 1.5 WAR = $16.7M per win</strong>. That's almost double market rate.</p>
+        <p>Paul Skenes at <strong>$3M for 5.5 WAR = $0.5M per win</strong>. That's the best deal on the board — 33x more efficient than Verlander.</p>
+        <p>This is why <strong>pre-arbitration players</strong> (young, controlled) are the real currency of front offices. You're getting premium production at a fraction of the price.</p>`
+    },
+    age: {
+        title: "&#128200; Age Curve — Peak Performance Windows",
+        body: `<p>Players don't perform at the same level forever. Research shows baseball players typically:</p>
+        <div class="formula">Peak performance: Ages 25-28<br>Gradual decline: ~0.5 WAR per year after 30<br>Sharp decline: After 35</div>
+        <p>When you sign a <strong>24-year-old</strong>, you're buying into their upside — they haven't peaked yet. When you sign a <strong>33-year-old</strong>, you're paying for who they were, not who they'll be.</p>
+        <p>That's the <strong>opportunity cost</strong> concept: every dollar locked into an aging veteran is a dollar you can't spend on a young breakout next summer.</p>
+        <p>Your dashboard's <strong>Avg Age</strong> should ideally be <strong>25-28</strong>. That means your core is in or approaching their prime — giving you both current production AND future upside.</p>`
+    },
+    risk: {
+        title: "&#9888;&#65039; Injury Risk — The Hidden Cost",
+        body: `<p>Injury risk is the percentage chance a player misses significant time. It's based on injury history, age, playing style, and position.</p>
+        <div class="formula">Low risk: 10-15% (reliable, durable)<br>Moderate risk: 20-25% (some concern)<br>High risk: 30%+ (major red flag)<br>Extreme risk: 45%+ (betting on luck)</div>
+        <p>A player's <strong>real value</strong> isn't their ceiling — it's their ceiling adjusted for the chance they actually reach it.</p>
+        <p>Max Scherzer might be brilliant when healthy, but at <strong>45% injury risk</strong>, you're basically flipping a coin on whether he even pitches.</p>
+        <p>This connects directly to <strong>expected value</strong>: Risk-adjusted thinking is what separates gamblers from general managers.</p>`
+    },
+    fan: {
+        title: "&#11088; Fan Appeal — Beyond the Numbers",
+        body: `<p><strong>Fan Appeal</strong> captures the intangibles that don't show up in WAR: ticket sales, jersey revenue, media attention, free-agent attraction, and locker room energy.</p>
+        <div class="formula">&#11088;&#11088;&#11088;&#11088;&#11088; = Franchise face (Ohtani, Judge)<br>&#11088;&#11088;&#11088;&#11088; = Star draw (Soto, Skenes)<br>&#11088;&#11088;&#11088; = Solid name recognition<br>&#11088;&#11088; = Under the radar<br>&#11088; = Analytics-only pick</div>
+        <p>This is the <strong>GM's dilemma</strong>: data says Cristopher Sanchez ($0.8M/WAR) is a better signing than Mookie Betts ($7.6M/WAR). But Betts sells tickets, attracts other stars, and energizes a fanbase.</p>
+        <p>Data narrows the range of mistakes — but it doesn't eliminate the human side of the job. A great GM balances both.</p>`
+    },
+    efficiency: {
+        title: "&#127942; Efficiency Score — The Efficient Frontier",
+        body: `<p>Your <strong>Efficiency Score</strong> is a weighted composite that measures how well you've balanced every dimension of roster-building:</p>
+        <div class="formula">Efficiency = (WAR &times; 30%) + (Value &times; 25%)<br>&nbsp;&nbsp;+ (Risk &times; 20%) + (Age &times; 15%)<br>&nbsp;&nbsp;+ (Chemistry &times; 10%)</div>
+        <p><strong>WAR Score (30%)</strong> — Did you acquire enough raw talent? Target: 35-45 total WAR.</p>
+        <p><strong>Value Score (25%)</strong> — Are you getting good deals? Low $/WAR = Moneyball efficiency.</p>
+        <p><strong>Risk Score (20%)</strong> — Are your wins reliable? Low injury risk = high expected value.</p>
+        <p><strong>Age Score (15%)</strong> — Is your core in their prime window (25-28)? Young = upside + flexibility.</p>
+        <p><strong>Chemistry Score (10%)</strong> — Do you have star power AND positional balance?</p>
+        <p>This mirrors the <strong>efficient frontier</strong> concept from economics: the best combination of return (wins), cost (salary), and risk (injuries). Score <strong>75+</strong> to enter the Green Zone.</p>`
+    }
+};
+
+// ========================================
+// GAME STATE
+// ========================================
+const state = {
+    selected: new Set(),
+    budget: 200,
+    maxRoster: 9
+};
+
+// ========================================
+// RENDER PLAYER CARDS
+// ========================================
+function getInitials(name) {
+    return name.split(' ').map(w => w[0]).join('');
+}
+
+function getCPWClass(cpw) {
+    if (cpw < 4) return 'cpw-green';
+    if (cpw <= 8) return 'cpw-yellow';
+    return 'cpw-red';
+}
+
+function renderStars(n) {
+    let s = '';
+    for (let i = 1; i <= 5; i++) {
+        s += i <= n ? '<span class="star-filled">&#9733;</span>' : '<span class="star-empty">&#9733;</span>';
+    }
+    return s;
+}
+
+function renderCards(players) {
+    const grid = document.getElementById('playerGrid');
+    const totalSalary = getTotalSalary();
+    grid.innerHTML = players.map(p => {
+        const cpw = (p.salary / p.war).toFixed(1);
+        const isSelected = state.selected.has(p.id);
+        const wouldExceed = !isSelected && (totalSalary + p.salary > state.budget);
+        const rosterFull = !isSelected && state.selected.size >= state.maxRoster;
+        const disabled = !isSelected && (wouldExceed || rosterFull);
+        return `
+        <div class="player-card tier-${p.tier} ${isSelected ? 'selected' : ''} ${disabled ? 'disabled' : ''}"
+             onclick="togglePlayer(${p.id})" data-id="${p.id}">
+            <div class="card-tier-accent"></div>
+            <div class="card-body">
+                <div class="card-top">
+                    <div class="card-avatar">${getInitials(p.name)}</div>
+                    <div class="card-name-block">
+                        <div class="card-name">${p.name}</div>
+                        <div class="card-meta">
+                            <span class="pos-badge">${p.position}</span>
+                            <span>Age ${p.age}</span>
+                            <span>${p.contractYears}yr deal</span>
+                        </div>
+                    </div>
+                    <div class="card-select-indicator"></div>
+                </div>
+                <div class="card-stats">
+                    <div class="card-stat">
+                        <div class="card-stat-label">WAR</div>
+                        <div class="card-stat-value" style="color: ${p.war >= 6 ? 'var(--accent-green)' : p.war >= 4 ? 'var(--accent-blue)' : 'var(--text-primary)'}">${p.war.toFixed(1)}</div>
+                    </div>
+                    <div class="card-stat">
+                        <div class="card-stat-label">Salary</div>
+                        <div class="card-stat-value">$${p.salary}M</div>
+                    </div>
+                    <div class="card-stat">
+                        <div class="card-stat-label">Risk</div>
+                        <div class="card-stat-value" style="color: ${p.injuryRisk >= 30 ? 'var(--accent-red)' : p.injuryRisk >= 20 ? 'var(--accent-amber)' : 'var(--accent-green)'}">${p.injuryRisk}%</div>
+                    </div>
+                </div>
+                <div class="card-bottom">
+                    <span class="card-cpw ${getCPWClass(parseFloat(cpw))}">$${cpw}M/WAR</span>
+                    <span class="card-stars">${renderStars(p.fanAppeal)}</span>
+                </div>
+                <div class="card-scout">"${p.scout}"</div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// ========================================
+// GAME LOGIC
+// ========================================
+function getPlayer(id) {
+    return PLAYERS.find(p => p.id === id);
+}
+
+function getSelectedPlayers() {
+    return PLAYERS.filter(p => state.selected.has(p.id));
+}
+
+function getTotalSalary() {
+    return getSelectedPlayers().reduce((s, p) => s + p.salary, 0);
+}
+
+function togglePlayer(id) {
+    const player = getPlayer(id);
+    if (!player) return;
+
+    if (state.selected.has(id)) {
+        state.selected.delete(id);
+    } else {
+        if (state.selected.size >= state.maxRoster) {
+            showToast("Roster full! Remove a player first.");
+            return;
+        }
+        const newTotal = getTotalSalary() + player.salary;
+        if (newTotal > state.budget) {
+            showToast(`Over budget! $${newTotal.toFixed(1)}M exceeds $${state.budget}M cap.`);
+            return;
+        }
+        state.selected.add(id);
+    }
+
+    updateEverything();
+}
+
+function updateEverything() {
+    const metrics = calculateMetrics();
+    updateDashboard(metrics);
+    renderCards(getCurrentSort());
+    checkWinCondition(metrics);
+}
+
+function calculateMetrics() {
+    const sel = getSelectedPlayers();
+    const n = sel.length;
+    if (n === 0) {
+        return { totalWAR: 0, adjWAR: 0, totalSalary: 0, avgCPW: 0, avgAge: 0, avgRisk: 0, avgFan: 0, warScore: 0, valueScore: 0, riskScore: 0, ageScore: 0, chemScore: 0, efficiency: 0 };
+    }
+
+    const totalWAR = sel.reduce((s, p) => s + p.war, 0);
+    const adjWAR = sel.reduce((s, p) => s + p.war * (1 - p.injuryRisk / 100), 0);
+    const totalSalary = sel.reduce((s, p) => s + p.salary, 0);
+    const avgCPW = totalSalary / totalWAR;
+    const avgAge = sel.reduce((s, p) => s + p.age, 0) / n;
+    const avgRisk = sel.reduce((s, p) => s + p.injuryRisk, 0) / n;
+    const avgFan = sel.reduce((s, p) => s + p.fanAppeal, 0) / n;
+
+    // WAR Score (30%) — target 40 total WAR
+    const warScore = Math.min(100, (totalWAR / 40) * 100);
+
+    // Value Score (25%) — lower $/WAR = better
+    const valueScore = Math.max(0, Math.min(100, (12 - avgCPW) / 6 * 100));
+
+    // Risk Score (20%) — lower avg risk = better, penalize 3+ high risk players
+    const highRiskCount = sel.filter(p => p.injuryRisk >= 30).length;
+    let riskScore = Math.max(0, 100 - (avgRisk * 2));
+    if (highRiskCount >= 3) riskScore = Math.max(0, riskScore - 20);
+
+    // Age Score (15%) — peak at 26.5
+    let ageScore = Math.max(0, 100 - (Math.pow(avgAge - 26.5, 2) * 4));
+    const youngCount = sel.filter(p => p.age < 26).length;
+    if (youngCount >= 2) ageScore = Math.min(100, ageScore + 10);
+
+    // Chemistry Score (10%)
+    let chemScore = 0;
+    const hasSuperstar = sel.some(p => p.fanAppeal === 5);
+    if (hasSuperstar) chemScore += 30;
+    const positions = new Set(sel.map(p => p.position.split('/')[0]));
+    if (positions.size >= 5) chemScore += 40;
+    else if (positions.size >= 4) chemScore += 25;
+    else if (positions.size >= 3) chemScore += 15;
+    const oldCount = sel.filter(p => p.age > 32).length;
+    if (oldCount <= 2) chemScore += 30;
+    else if (oldCount <= 3) chemScore += 15;
+
+    const efficiency = Math.round(
+        warScore * 0.30 + valueScore * 0.25 + riskScore * 0.20 + ageScore * 0.15 + chemScore * 0.10
+    );
+
+    return { totalWAR, adjWAR, totalSalary, avgCPW, avgAge, avgRisk, avgFan, warScore, valueScore, riskScore, ageScore, chemScore, efficiency };
+}
+
+function updateDashboard(m) {
+    const n = state.selected.size;
+
+    // Budget
+    const pct = (m.totalSalary / state.budget) * 100;
+    const budgetBar = document.getElementById('budgetBar');
+    const budgetText = document.getElementById('budgetText');
+    budgetBar.style.width = Math.min(pct, 100) + '%';
+    if (pct > 95) {
+        budgetBar.style.background = 'var(--accent-red)';
+        budgetText.style.color = 'var(--accent-red)';
+    } else if (pct > 75) {
+        budgetBar.style.background = 'var(--accent-amber)';
+        budgetText.style.color = 'var(--accent-amber)';
+    } else {
+        budgetBar.style.background = 'var(--accent-green)';
+        budgetText.style.color = 'var(--accent-green)';
+    }
+    budgetText.textContent = `$${m.totalSalary.toFixed(1)}M / $${state.budget}M`;
+
+    // Roster count
+    document.getElementById('rosterCount').textContent = n;
+
+    // Owner mood
+    const mood = document.getElementById('ownerMood');
+    if (n === 0) { mood.textContent = '\u{1F610}'; mood.dataset.tip = 'Owner is waiting...'; }
+    else if (n < 9) {
+        if (m.efficiency < 30) { mood.textContent = '\u{1F621}'; mood.dataset.tip = 'Owner is furious'; }
+        else if (m.efficiency < 50) { mood.textContent = '\u{1F61F}'; mood.dataset.tip = 'Owner is worried'; }
+        else if (m.efficiency < 65) { mood.textContent = '\u{1F914}'; mood.dataset.tip = 'Owner is thinking...'; }
+        else if (m.efficiency < 75) { mood.textContent = '\u{1F60A}'; mood.dataset.tip = 'Owner is hopeful'; }
+        else { mood.textContent = '\u{1F60E}'; mood.dataset.tip = 'Owner is impressed!'; }
+    } else {
+        if (m.efficiency >= 75) { mood.textContent = '\u{1F929}'; mood.dataset.tip = 'Owner is ECSTATIC!'; }
+        else if (m.efficiency >= 60) { mood.textContent = '\u{1F60A}'; mood.dataset.tip = 'Owner sees potential'; }
+        else { mood.textContent = '\u{1F612}'; mood.dataset.tip = 'Owner wants a meeting...'; }
+    }
+
+    // Stats
+    animateValue('statWAR', m.totalWAR, 1);
+    animateValue('statAdjWAR', m.adjWAR, 1);
+
+    const cpwEl = document.getElementById('statCPW');
+    if (n > 0) {
+        cpwEl.textContent = '$' + m.avgCPW.toFixed(1) + 'M';
+        cpwEl.style.color = m.avgCPW < 5 ? 'var(--accent-green)' : m.avgCPW <= 8 ? 'var(--accent-amber)' : 'var(--accent-red)';
+    } else {
+        cpwEl.textContent = '\u2014';
+        cpwEl.style.color = 'var(--text-primary)';
+    }
+
+    const ageEl = document.getElementById('statAge');
+    if (n > 0) {
+        ageEl.textContent = m.avgAge.toFixed(1);
+        ageEl.style.color = m.avgAge <= 28 ? 'var(--accent-green)' : m.avgAge <= 31 ? 'var(--accent-amber)' : 'var(--accent-red)';
+    } else {
+        ageEl.textContent = '\u2014';
+        ageEl.style.color = 'var(--text-primary)';
+    }
+
+    const riskEl = document.getElementById('statRisk');
+    if (n > 0) {
+        riskEl.textContent = m.avgRisk.toFixed(0) + '%';
+        riskEl.style.color = m.avgRisk < 15 ? 'var(--accent-green)' : m.avgRisk <= 25 ? 'var(--accent-amber)' : 'var(--accent-red)';
+    } else {
+        riskEl.textContent = '\u2014';
+        riskEl.style.color = 'var(--text-primary)';
+    }
+
+    const fanEl = document.getElementById('statFan');
+    if (n > 0) {
+        fanEl.textContent = m.avgFan.toFixed(1) + ' \u2605';
+        fanEl.style.color = m.avgFan >= 3.5 ? 'var(--accent-gold)' : 'var(--text-primary)';
+    } else {
+        fanEl.textContent = '\u2014';
+        fanEl.style.color = 'var(--text-primary)';
+    }
+
+    // WAR color
+    const warEl = document.getElementById('statWAR');
+    warEl.style.color = m.totalWAR >= 40 ? 'var(--accent-green)' : m.totalWAR >= 30 ? 'var(--accent-amber)' : 'var(--text-primary)';
+    const adjEl = document.getElementById('statAdjWAR');
+    adjEl.style.color = m.adjWAR >= 35 ? 'var(--accent-green)' : m.adjWAR >= 25 ? 'var(--accent-amber)' : 'var(--text-primary)';
+
+    // Efficiency bar
+    const effBar = document.getElementById('effBar');
+    const effScore = document.getElementById('effScore');
+    const eff = n > 0 ? m.efficiency : 0;
+    effBar.style.width = eff + '%';
+    effScore.textContent = eff;
+    if (eff >= 75) {
+        effBar.style.background = 'var(--accent-green)';
+        effScore.style.color = 'var(--accent-green)';
+    } else if (eff >= 60) {
+        effBar.style.background = 'var(--accent-amber)';
+        effScore.style.color = 'var(--accent-amber)';
+    } else if (n > 0) {
+        effBar.style.background = 'var(--accent-red)';
+        effScore.style.color = 'var(--accent-red)';
+    } else {
+        effBar.style.background = 'var(--text-dim)';
+        effScore.style.color = 'var(--text-dim)';
+    }
+
+    // Pulse animation
+    effScore.classList.remove('pulse');
+    void effScore.offsetWidth;
+    effScore.classList.add('pulse');
+}
+
+// Simple value animation
+function animateValue(elId, target, decimals) {
+    const el = document.getElementById(elId);
+    const current = parseFloat(el.textContent) || 0;
+    const diff = target - current;
+    const steps = 15;
+    let step = 0;
+    const interval = setInterval(() => {
+        step++;
+        const val = current + diff * (step / steps);
+        el.textContent = val.toFixed(decimals);
+        if (step >= steps) {
+            el.textContent = target.toFixed(decimals);
+            clearInterval(interval);
+        }
+    }, 20);
+}
+
+// ========================================
+// WIN CONDITION
+// ========================================
+let hasShownResult = false;
+
+function checkWinCondition(m) {
+    if (state.selected.size === 9 && !hasShownResult) {
+        hasShownResult = true;
+        setTimeout(() => showResult(m), 400);
+    }
+}
+
+function showResult(m) {
+    const isGreen = m.efficiency >= 75;
+    const isYellow = m.efficiency >= 60;
+
+    let zoneClass, zoneLabel, emoji, message;
+    if (isGreen) {
+        zoneClass = 'zone-green'; zoneLabel = 'Green Zone'; emoji = '\u{1F3C6}';
+        message = "You found the efficient frontier. You balanced talent, value, risk, and upside like a real front-office executive. Data narrowed the range of mistakes — and your instincts closed the deal.";
+    } else if (isYellow) {
+        zoneClass = 'zone-yellow'; zoneLabel = 'Yellow Zone'; emoji = '\u{1F4CA}';
+        message = "You're close to a contender! Look at your $/WAR and risk metrics. Are you overpaying for declining talent? Can you find hidden gems with better value?";
+    } else {
+        zoneClass = 'zone-red'; zoneLabel = 'Red Zone'; emoji = '\u{1F4C9}';
+        message = "Your owner is calling an emergency meeting. You might be chasing big names instead of smart value. Remember: the most famous player isn't always the best investment.";
+    }
+
+    // Generate lessons
+    let lessons = [];
+    if (m.valueScore >= 70) lessons.push("<strong>Moneyball Master:</strong> You found the value edge — paying for production, not reputation. Oakland would be proud.");
+    if (m.valueScore < 40) lessons.push("<strong>Overspending Alert:</strong> Your $/WAR is too high. Look for players where the analytics outpace the price tag.");
+    if (m.ageScore >= 70) lessons.push("<strong>Future-Proofed:</strong> You built around the age curve. Young cores create championship windows, not just championship moments.");
+    if (m.ageScore < 40) lessons.push("<strong>Aging Roster:</strong> Your average age is too high. Remember: players peak at 26-27 and decline after 30.");
+    if (m.riskScore >= 70) lessons.push("<strong>Risk Manager:</strong> Low injury risk means your expected WAR is close to your projected WAR. Availability IS the best ability.");
+    if (m.riskScore < 40) lessons.push("<strong>Injury-Prone:</strong> Too many high-risk players. Your adjusted WAR is way below your raw WAR — that's expected value working against you.");
+    if (m.warScore >= 80) lessons.push("<strong>Talent-Rich:</strong> You loaded up on production. The key question: did you do it efficiently?");
+    if (lessons.length === 0) lessons.push("<strong>Balanced Build:</strong> You spread your resources across multiple dimensions. Keep fine-tuning to find the efficient frontier.");
+
+    const content = `
+        <div style="font-size:48px; margin-bottom: 8px;">${emoji}</div>
+        <h2 style="justify-content:center; font-size: 18px;">Roster Complete!</h2>
+        <div class="win-score">${m.efficiency}</div>
+        <div class="win-zone ${zoneClass}">${zoneLabel}</div>
+
+        <div class="score-breakdown">
+            ${renderBreakdown('WAR', m.warScore, 'var(--accent-blue)')}
+            ${renderBreakdown('Value', m.valueScore, 'var(--accent-green)')}
+            ${renderBreakdown('Risk', m.riskScore, 'var(--accent-amber)')}
+            ${renderBreakdown('Age', m.ageScore, 'var(--accent-purple)')}
+            ${renderBreakdown('Chemistry', m.chemScore, 'var(--accent-gold)')}
+        </div>
+
+        ${isGreen ? `
+        <div class="claim-code">
+            <div class="code-label">Your Claim Code</div>
+            <div class="code-value">L1-201-M3-DATA</div>
+        </div>
+        ` : ''}
+
+        <p class="win-message">${message}</p>
+
+        <div class="lesson-callouts">
+            ${lessons.map(l => `<div class="lesson-callout">${l}</div>`).join('')}
+        </div>
+
+        <button class="try-again-btn" onclick="closeResult(); resetGame();">
+            ${isGreen ? 'Build Another Roster' : 'Try Again'}
+        </button>
+    `;
+
+    document.getElementById('resultContent').innerHTML = content;
+    document.getElementById('resultModal').classList.add('active');
+
+    if (isGreen) spawnConfetti();
+}
+
+function renderBreakdown(label, score, color) {
+    return `<div class="breakdown-item">
+        <div class="bd-label">${label}</div>
+        <div class="bd-value" style="color: ${score >= 60 ? color : 'var(--text-dim)'}">${Math.round(score)}</div>
+        <div class="bd-bar"><div class="bd-bar-fill" style="width:${score}%; background:${color};"></div></div>
+    </div>`;
+}
+
+// ========================================
+// CONFETTI
+// ========================================
+function spawnConfetti() {
+    const colors = ['#00ff88', '#00d4ff', '#ffd700', '#ff3355', '#a855f7', '#ffaa00'];
+    for (let i = 0; i < 100; i++) {
+        setTimeout(() => {
+            const piece = document.createElement('div');
+            piece.className = 'confetti-piece';
+            piece.style.left = Math.random() * 100 + 'vw';
+            piece.style.top = '-10px';
+            piece.style.width = (Math.random() * 8 + 4) + 'px';
+            piece.style.height = (Math.random() * 12 + 4) + 'px';
+            piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+            piece.style.animationDuration = (Math.random() * 2 + 2) + 's';
+            piece.style.animationDelay = '0s';
+            document.body.appendChild(piece);
+            setTimeout(() => piece.remove(), 4000);
+        }, i * 30);
+    }
+}
+
+// ========================================
+// SORTING
+// ========================================
+let currentSort = 'default';
+
+function getCurrentSort() {
+    const sortFns = {
+        default: (a, b) => a.tierOrder - b.tierOrder,
+        war: (a, b) => b.war - a.war,
+        salary: (a, b) => b.salary - a.salary,
+        age: (a, b) => a.age - b.age,
+        cpw: (a, b) => (a.salary / a.war) - (b.salary / b.war),
+        fan: (a, b) => b.fanAppeal - a.fanAppeal || b.war - a.war
+    };
+    return [...PLAYERS].sort(sortFns[currentSort] || sortFns.default);
+}
+
+function sortPlayers(key, btn) {
+    currentSort = key;
+    document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderCards(getCurrentSort());
+}
+
+// ========================================
+// MODALS & TOAST
+// ========================================
+function showInfo(topic) {
+    const info = INFO[topic];
+    if (!info) return;
+    document.getElementById('infoContent').innerHTML = `<h2>${info.title}</h2>${info.body}`;
+    document.getElementById('infoModal').classList.add('active');
+}
+
+function closeInfo() {
+    document.getElementById('infoModal').classList.remove('active');
+}
+
+function closeResult() {
+    document.getElementById('resultModal').classList.remove('active');
+}
+
+// Close modals on overlay click
+document.getElementById('infoModal').addEventListener('click', function(e) {
+    if (e.target === this) closeInfo();
+});
+document.getElementById('resultModal').addEventListener('click', function(e) {
+    if (e.target === this) closeResult();
+});
+
+let toastTimer;
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ========================================
+// RESET
+// ========================================
+function resetGame() {
+    state.selected.clear();
+    hasShownResult = false;
+    updateEverything();
+}
+
+// ========================================
+// INIT
+// ========================================
+function startGame() {
+    document.getElementById('introOverlay').classList.add('hidden');
+}
+
+// Initial render
+renderCards(getCurrentSort());
+updateDashboard(calculateMetrics());
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeInfo();
+        closeResult();
+    }
+});
+</script>
+
+</body>
+</html>
