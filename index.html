@@ -86,6 +86,33 @@
             line-height: 1.5;
         }
         .header-subtitle strong { color: var(--accent-amber); }
+        .header-actions { margin-top: 8px; display: flex; justify-content: center; gap: 8px; }
+        .header-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            border-radius: 8px;
+            padding: 5px 14px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        .header-btn:hover { background: rgba(0,212,255,0.1); border-color: var(--accent-blue); color: var(--accent-blue); }
+
+        /* ===== MANDATE BANNER ===== */
+        .mandate-banner {
+            background: linear-gradient(135deg, rgba(168,85,247,0.15), rgba(0,212,255,0.1));
+            border-bottom: 1px solid rgba(168,85,247,0.3);
+            padding: 14px 24px;
+            text-align: center;
+            display: none;
+        }
+        .mandate-banner.active { display: block; }
+        .mandate-emoji { font-size: 28px; margin-bottom: 4px; }
+        .mandate-name { font-size: 18px; font-weight: 800; color: var(--accent-purple); margin-bottom: 4px; }
+        .mandate-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.5; max-width: 600px; margin: 0 auto; }
+        .mandate-constraint { display: inline-block; background: rgba(255,51,85,0.12); border: 1px solid rgba(255,51,85,0.3); border-radius: 6px; padding: 3px 10px; font-size: 11px; color: var(--accent-red); font-weight: 600; margin-top: 6px; }
 
         /* ===== DASHBOARD (sticky) ===== */
         .dashboard {
@@ -123,6 +150,7 @@
             background: rgba(255,255,255,0.06);
             border-radius: 4px;
             overflow: hidden;
+            position: relative;
         }
         .budget-bar {
             height: 100%;
@@ -131,15 +159,34 @@
             transition: width 0.5s ease, background 0.3s ease;
             width: 0%;
         }
+        .luxury-tax-marker {
+            position: absolute;
+            top: -2px; bottom: -2px;
+            width: 2px;
+            background: var(--accent-amber);
+            left: 80%;
+            z-index: 2;
+            border-radius: 1px;
+        }
         .budget-text {
             font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
             font-size: 14px;
             font-weight: 700;
             color: var(--accent-green);
             transition: color 0.3s ease;
-            min-width: 110px;
+            min-width: 160px;
             text-align: right;
         }
+        .tax-penalty-text { font-size: 11px; color: var(--accent-amber); font-weight: 600; }
+        .scout-tokens {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 12px; color: var(--text-secondary);
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 4px 10px;
+        }
+        .scout-tokens strong { color: var(--accent-blue); font-family: 'SF Mono', monospace; }
         .roster-count {
             font-size: 13px;
             color: var(--text-secondary);
@@ -175,21 +222,21 @@
 
         .dash-stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
             gap: 8px;
         }
         .stat-card {
             background: rgba(255,255,255,0.03);
             border: 1px solid var(--border);
             border-radius: 10px;
-            padding: 8px 12px;
+            padding: 8px 10px;
             text-align: center;
             transition: border-color 0.3s ease;
         }
         .stat-card .stat-label {
-            font-size: 10px;
+            font-size: 9px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.8px;
             color: var(--text-dim);
             margin-bottom: 2px;
             display: flex;
@@ -199,13 +246,13 @@
         }
         .stat-card .stat-value {
             font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 700;
             color: var(--text-primary);
             transition: color 0.3s ease;
         }
         .stat-card .stat-sub {
-            font-size: 10px;
+            font-size: 9px;
             color: var(--text-dim);
             margin-top: 1px;
         }
@@ -290,6 +337,133 @@
         .eff-zones span:nth-child(2) { color: var(--accent-amber); }
         .eff-zones span:nth-child(3) { color: var(--accent-green); }
 
+        /* ===== SYNERGY BAR ===== */
+        .synergy-bar {
+            margin-top: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            min-height: 24px;
+        }
+        .synergy-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: help;
+            position: relative;
+            animation: badgeIn 0.3s ease;
+        }
+        .synergy-badge.bonus { background: rgba(0,255,136,0.12); color: var(--accent-green); border: 1px solid rgba(0,255,136,0.25); }
+        .synergy-badge.penalty { background: rgba(255,51,85,0.12); color: var(--accent-red); border: 1px solid rgba(255,51,85,0.25); }
+        .synergy-badge:hover::after {
+            content: attr(data-tip);
+            position: absolute;
+            bottom: calc(100% + 6px);
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            white-space: nowrap;
+            background: var(--bg-secondary);
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            z-index: 10;
+            font-weight: 400;
+        }
+        @keyframes badgeIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+
+        /* ===== POSITION MAP ===== */
+        .position-map {
+            margin-top: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+        }
+        .pos-slot {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.03);
+            color: var(--text-dim);
+            transition: all 0.3s;
+        }
+        .pos-slot.filled { border-color: rgba(0,255,136,0.4); color: var(--accent-green); background: rgba(0,255,136,0.08); }
+        .pos-slot.empty { border-color: rgba(255,170,0,0.3); color: var(--accent-amber); animation: softPulse 2s ease-in-out infinite; }
+        @keyframes softPulse { 0%,100%{ opacity:0.7; } 50%{ opacity:1; } }
+
+        /* ===== PLAYOFF ODDS ===== */
+        .playoff-section {
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .playoff-ring {
+            width: 52px; height: 52px;
+            border-radius: 50%;
+            background: conic-gradient(var(--accent-green) 0%, transparent 0%);
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
+            flex-shrink: 0;
+        }
+        .playoff-ring-inner {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background: var(--bg-primary);
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'SF Mono', monospace;
+            font-weight: 800;
+            font-size: 13px;
+        }
+        .playoff-text { font-size: 12px; color: var(--text-secondary); line-height: 1.4; }
+        .playoff-text strong { color: var(--text-primary); }
+
+        /* ===== MEDIA TICKER ===== */
+        .media-ticker {
+            background: rgba(255,170,0,0.06);
+            border-bottom: 1px solid rgba(255,170,0,0.15);
+            padding: 8px 20px;
+            overflow: hidden;
+            position: relative;
+            min-height: 32px;
+            display: none;
+        }
+        .media-ticker.active { display: block; }
+        .ticker-content {
+            font-size: 13px;
+            color: var(--accent-amber);
+            font-weight: 600;
+            white-space: nowrap;
+            animation: tickerSlide 0.5s ease;
+        }
+        .ticker-label {
+            display: inline-block;
+            background: rgba(255,170,0,0.2);
+            border-radius: 4px;
+            padding: 1px 6px;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin-right: 8px;
+            text-transform: uppercase;
+        }
+        @keyframes tickerSlide { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+
         /* ===== CONTROLS ===== */
         .controls {
             padding: 14px 20px;
@@ -329,6 +503,20 @@
             border-color: var(--accent-blue);
             color: var(--accent-blue);
         }
+        .ctrl-btn-group { display: flex; gap: 6px; align-items: center; }
+        .compare-btn {
+            background: rgba(168,85,247,0.1);
+            border: 1px solid rgba(168,85,247,0.3);
+            color: var(--accent-purple);
+            border-radius: 8px;
+            padding: 6px 14px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        .compare-btn:hover, .compare-btn.active { background: rgba(168,85,247,0.2); border-color: var(--accent-purple); }
         .reset-btn {
             background: rgba(255, 51, 85, 0.1);
             border: 1px solid rgba(255, 51, 85, 0.3);
@@ -379,7 +567,7 @@
             border-color: var(--accent-blue);
         }
         .player-card.selected .card-select-indicator::after {
-            content: '✓';
+            content: '\2713';
             color: #fff;
             font-size: 12px;
             font-weight: 700;
@@ -387,6 +575,25 @@
         .player-card.disabled {
             opacity: 0.4;
             pointer-events: none;
+        }
+        .player-card.rival-taken {
+            opacity: 0.35;
+            pointer-events: none;
+            position: relative;
+        }
+        .player-card.rival-taken::after {
+            content: 'SIGNED BY RIVAL';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%,-50%) rotate(-15deg);
+            background: rgba(255,51,85,0.9);
+            color: #fff;
+            padding: 4px 14px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            z-index: 5;
         }
 
         .card-tier-accent {
@@ -448,6 +655,16 @@
             font-weight: 600;
             font-size: 11px;
         }
+        .scouted-badge {
+            background: rgba(0,212,255,0.15);
+            border: 1px solid rgba(0,212,255,0.3);
+            color: var(--accent-blue);
+            font-size: 9px;
+            font-weight: 700;
+            padding: 1px 5px;
+            border-radius: 3px;
+            letter-spacing: 0.5px;
+        }
         .card-select-indicator {
             width: 24px;
             height: 24px;
@@ -484,6 +701,32 @@
             font-size: 15px;
             font-weight: 700;
         }
+        .blurred-stat {
+            filter: blur(4px);
+            user-select: none;
+        }
+
+        /* Sparkline (3-year projection) */
+        .sparkline-wrap {
+            display: flex;
+            align-items: flex-end;
+            gap: 2px;
+            height: 18px;
+            margin-top: 4px;
+            justify-content: center;
+        }
+        .spark-bar {
+            width: 10px;
+            border-radius: 2px 2px 0 0;
+            min-height: 2px;
+            transition: height 0.3s;
+        }
+        .spark-label {
+            font-size: 8px;
+            color: var(--text-dim);
+            text-align: center;
+            margin-top: 1px;
+        }
 
         .card-bottom {
             display: flex;
@@ -519,6 +762,26 @@
             border-top: 1px solid var(--border);
         }
 
+        .card-actions {
+            display: flex;
+            gap: 4px;
+            margin-top: 6px;
+        }
+        .scout-btn {
+            background: rgba(0,212,255,0.08);
+            border: 1px solid rgba(0,212,255,0.25);
+            color: var(--accent-blue);
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-size: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        .scout-btn:hover { background: rgba(0,212,255,0.2); }
+        .scout-btn:disabled { opacity: 0.3; cursor: default; }
+
         /* ===== MODALS ===== */
         .modal-overlay {
             position: fixed;
@@ -536,9 +799,9 @@
             background: var(--bg-secondary);
             border: 1px solid var(--border);
             border-radius: 16px;
-            max-width: 520px;
+            max-width: 600px;
             width: 100%;
-            max-height: 85vh;
+            max-height: 90vh;
             overflow-y: auto;
             padding: 28px;
             position: relative;
@@ -594,9 +857,9 @@
         /* Win Modal special */
         .win-modal .modal {
             text-align: center;
-            border-color: rgba(0, 255, 136, 0.3);
-            box-shadow: 0 0 60px rgba(0, 255, 136, 0.1);
+            max-width: 650px;
         }
+        .win-modal .modal.zone-green-border { border-color: rgba(0, 255, 136, 0.3); box-shadow: 0 0 60px rgba(0, 255, 136, 0.1); }
         .win-modal .win-score {
             font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
             font-size: 64px;
@@ -644,7 +907,7 @@
         }
         .score-breakdown {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
             gap: 8px;
             margin: 16px 0;
             text-align: center;
@@ -652,7 +915,7 @@
         .breakdown-item {
             background: rgba(255,255,255,0.03);
             border-radius: 8px;
-            padding: 10px;
+            padding: 10px 6px;
         }
         .breakdown-item .bd-label {
             font-size: 10px;
@@ -663,7 +926,7 @@
         }
         .breakdown-item .bd-value {
             font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
         }
         .breakdown-item .bd-bar {
@@ -718,6 +981,191 @@
             box-shadow: 0 4px 20px rgba(0, 212, 255, 0.3);
         }
 
+        /* ===== SIMULATION MODAL ===== */
+        .sim-modal .modal { max-width: 580px; text-align: center; }
+        .sim-phase { font-size: 14px; font-weight: 700; color: var(--accent-amber); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; }
+        .sim-ticker {
+            text-align: left;
+            max-height: 320px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        .sim-event {
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.5;
+            animation: tickerSlide 0.4s ease;
+        }
+        .sim-event.injury { background: rgba(255,51,85,0.1); border-left: 3px solid var(--accent-red); color: var(--accent-red); }
+        .sim-event.breakout { background: rgba(0,255,136,0.1); border-left: 3px solid var(--accent-green); color: var(--accent-green); }
+        .sim-event.steady { background: rgba(255,255,255,0.03); border-left: 3px solid var(--text-dim); color: var(--text-secondary); }
+
+        /* ===== TRADE MODAL ===== */
+        .trade-modal .modal { max-width: 700px; }
+        .trade-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+        .trade-column h3 { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); margin-bottom: 8px; text-align: center; }
+        .trade-player-item {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 12px;
+        }
+        .trade-player-item:hover { border-color: var(--accent-blue); background: rgba(0,212,255,0.05); }
+        .trade-player-item.trade-selected { border-color: var(--accent-blue); background: rgba(0,212,255,0.1); }
+        .trade-player-item .tp-name { font-weight: 700; margin-bottom: 2px; }
+        .trade-player-item .tp-stats { color: var(--text-dim); font-size: 11px; }
+        .trade-fee { color: var(--accent-amber); font-size: 13px; font-weight: 600; margin: 8px 0; }
+        .trade-btn {
+            background: linear-gradient(135deg, var(--accent-amber), #ff8800);
+            border: none; color: #000; padding: 8px 24px;
+            border-radius: 8px; font-size: 13px; font-weight: 700;
+            cursor: pointer; transition: all 0.2s; font-family: inherit;
+        }
+        .trade-btn:hover { transform: translateY(-1px); }
+        .trade-btn:disabled { opacity: 0.3; cursor: default; transform: none; }
+        .standpat-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 8px 24px;
+            border-radius: 8px; font-size: 13px;
+            cursor: pointer; transition: all 0.2s; font-family: inherit;
+        }
+
+        /* ===== QUIZ MODAL ===== */
+        .quiz-modal .modal { max-width: 540px; text-align: left; }
+        .quiz-progress { font-size: 12px; color: var(--text-dim); margin-bottom: 8px; }
+        .quiz-question { font-size: 15px; font-weight: 600; color: var(--text-primary); margin-bottom: 14px; line-height: 1.5; }
+        .quiz-option {
+            display: block; width: 100%;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+            font-family: inherit;
+            line-height: 1.4;
+        }
+        .quiz-option:hover { border-color: var(--accent-blue); background: rgba(0,212,255,0.05); }
+        .quiz-option.correct { border-color: var(--accent-green); background: rgba(0,255,136,0.1); color: var(--accent-green); }
+        .quiz-option.wrong { border-color: var(--accent-red); background: rgba(255,51,85,0.1); color: var(--accent-red); }
+        .quiz-option:disabled { cursor: default; opacity: 0.7; }
+        .quiz-explanation {
+            background: rgba(0,212,255,0.06);
+            border: 1px solid rgba(0,212,255,0.15);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin: 10px 0;
+            line-height: 1.5;
+        }
+        .quiz-next-btn {
+            background: var(--accent-blue);
+            border: none; color: #000;
+            padding: 8px 24px; border-radius: 8px;
+            font-size: 13px; font-weight: 700;
+            cursor: pointer; font-family: inherit;
+        }
+
+        /* ===== COMPARISON MODAL ===== */
+        .compare-modal .modal { max-width: 560px; }
+        .compare-grid {
+            display: grid; grid-template-columns: 1fr 60px 1fr;
+            gap: 6px; margin: 12px 0; align-items: center; text-align: center;
+        }
+        .compare-name { font-size: 15px; font-weight: 700; }
+        .compare-vs { font-size: 12px; color: var(--text-dim); }
+        .compare-row {
+            display: grid; grid-template-columns: 1fr 80px 1fr;
+            gap: 6px; padding: 6px 0; border-bottom: 1px solid var(--border);
+            align-items: center; font-size: 13px; text-align: center;
+        }
+        .compare-row .cr-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; }
+        .compare-row .cr-winner { color: var(--accent-green); font-weight: 700; }
+        .compare-row .cr-loser { color: var(--text-dim); }
+        .analyst-take {
+            background: rgba(0,255,136,0.06);
+            border: 1px solid rgba(0,255,136,0.15);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 12px;
+            line-height: 1.5;
+        }
+        .analyst-take strong { color: var(--accent-green); }
+
+        /* ===== LEADERBOARD/ACHIEVEMENT MODAL ===== */
+        .lb-modal .modal { max-width: 560px; }
+        .lb-tabs { display: flex; gap: 4px; margin-bottom: 14px; }
+        .lb-tab {
+            flex: 1; padding: 8px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-size: 12px; font-weight: 600;
+            cursor: pointer; text-align: center;
+            transition: all 0.2s; font-family: inherit;
+        }
+        .lb-tab.active { border-color: var(--accent-blue); color: var(--accent-blue); background: rgba(0,212,255,0.08); }
+        .lb-entry {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 8px;
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+        .lb-entry .lb-mandate { color: var(--text-secondary); }
+        .lb-entry .lb-score { font-family: 'SF Mono', monospace; font-weight: 700; }
+        .achievement-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 8px;
+        }
+        .achievement-item {
+            text-align: center;
+            padding: 12px 8px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+        .achievement-item.unlocked { border-color: rgba(255,215,0,0.4); background: rgba(255,215,0,0.05); }
+        .achievement-item.locked { opacity: 0.4; }
+        .achievement-item .ach-icon { font-size: 24px; margin-bottom: 4px; }
+        .achievement-item .ach-name { font-size: 11px; font-weight: 600; color: var(--text-secondary); }
+
+        /* ===== RIVAL BANNER ===== */
+        .rival-banner {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            background: linear-gradient(135deg, rgba(255,51,85,0.95), rgba(200,0,50,0.95));
+            color: #fff;
+            text-align: center;
+            padding: 14px 20px;
+            z-index: 1500;
+            transform: translateY(-100%);
+            transition: transform 0.5s ease;
+            font-weight: 700;
+        }
+        .rival-banner.show { transform: translateY(0); }
+        .rival-banner .rb-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.8; margin-bottom: 4px; }
+        .rival-banner .rb-text { font-size: 15px; }
+
         /* Confetti */
         .confetti-piece {
             position: fixed;
@@ -748,10 +1196,15 @@
             transition: all 0.3s ease;
             white-space: nowrap;
             box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+            max-width: 90vw;
         }
         .toast.show {
             opacity: 1;
             transform: translateX(-50%) translateY(0);
+        }
+        .toast.achievement-toast {
+            border-color: rgba(255,215,0,0.5);
+            background: linear-gradient(135deg, var(--bg-secondary), rgba(255,215,0,0.08));
         }
 
         /* Intro overlay */
@@ -833,30 +1286,57 @@
             box-shadow: 0 6px 30px rgba(0, 255, 136, 0.3);
         }
 
+        /* Projected vs Actual side-by-side */
+        .projected-vs-actual {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0;
+            text-align: center;
+        }
+        .pva-box {
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+            padding: 12px;
+            border: 1px solid var(--border);
+        }
+        .pva-box h4 { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); margin-bottom: 6px; }
+        .pva-score { font-family: 'SF Mono', monospace; font-size: 32px; font-weight: 800; }
+
+        /* Media narrative section */
+        .media-narrative {
+            background: rgba(255,170,0,0.06);
+            border: 1px solid rgba(255,170,0,0.15);
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin: 12px 0;
+            text-align: left;
+        }
+        .media-narrative h4 { font-size: 12px; color: var(--accent-amber); margin-bottom: 6px; }
+        .media-narrative p { font-size: 13px; font-style: italic; }
+
         /* RESPONSIVE */
         @media (max-width: 768px) {
             .game-header { padding: 16px; }
             .dashboard { padding: 10px 12px; }
             .dash-stats { grid-template-columns: repeat(3, 1fr); }
-            .stat-card .stat-value { font-size: 15px; }
+            .stat-card .stat-value { font-size: 14px; }
             .player-grid { grid-template-columns: 1fr; padding: 12px; gap: 12px; }
             .controls { padding: 10px 12px; }
             .budget-bar-wrap { width: 120px; }
             .sort-btn { padding: 4px 8px; font-size: 11px; }
+            .trade-grid { grid-template-columns: 1fr; }
+            .compare-grid, .compare-row { grid-template-columns: 1fr; }
         }
         @media (max-width: 480px) {
             .dash-stats { grid-template-columns: repeat(2, 1fr); }
             .card-stats { grid-template-columns: repeat(3, 1fr); }
         }
 
-        /* Pulse animation for score changes */
+        /* Animations */
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.08); }
         }
         .pulse { animation: pulse 0.3s ease; }
 
-        /* Shimmer for selected card */
         @keyframes shimmer {
             0% { background-position: -200% center; }
             100% { background-position: 200% center; }
@@ -874,14 +1354,22 @@
         <p>You've just been hired as the GM of an expansion franchise. Your job: build a championship-caliber roster through free agency.</p>
         <p>But you can't just buy the biggest names. You need to balance <strong style="color: var(--accent-blue);">production</strong>, <strong style="color: var(--accent-green);">value</strong>, <strong style="color: var(--accent-amber);">risk</strong>, and <strong style="color: var(--accent-red);">cost</strong> &mdash; just like a real front office.</p>
         <ul class="intro-rules">
-            <li><strong>Select 9 players</strong> to fill your roster</li>
-            <li><strong>Stay under $200M</strong> salary cap</li>
+            <li><strong>Select 9 players</strong> to fill your roster with required positions</li>
+            <li><strong>Navigate the salary cap</strong> &mdash; spending over $160M triggers luxury tax penalties</li>
+            <li><strong>Use 8 Scout Tokens</strong> to reveal hidden player data</li>
             <li><strong>Maximize your Efficiency Score</strong> &mdash; it measures WAR, value, risk, age, and chemistry</li>
-            <li><strong>Hit the Green Zone (75+)</strong> to prove you can run a front office and unlock your claim code</li>
+            <li><strong>Survive the Season Simulation</strong> &mdash; injuries and breakouts will test your roster</li>
+            <li><strong>Hit the Green Zone (75+)</strong> to prove you can run a front office</li>
         </ul>
-        <p style="font-size: 13px; color: var(--text-dim);">Tip: The most famous player isn't always the smartest signing. Think like a GM, not a fan.</p>
+        <p style="font-size: 13px; color: var(--text-dim);">Each game draws a random Owner Mandate that changes the rules. No two games are the same.</p>
         <button class="start-btn" onclick="startGame()">Enter the War Room</button>
     </div>
+</div>
+
+<!-- ===== RIVAL BANNER ===== -->
+<div class="rival-banner" id="rivalBanner">
+    <div class="rb-label">ESPN BREAKING NEWS</div>
+    <div class="rb-text" id="rivalBannerText"></div>
 </div>
 
 <!-- ===== HEADER ===== -->
@@ -889,17 +1377,32 @@
     <div class="header-badge">Track 201 &middot; Module 3 &middot; Lesson 1</div>
     <h1 class="header-title">The Front Office Dashboard</h1>
     <p class="header-subtitle">Build the most efficient roster. Balance WAR, cost, risk, and upside. Hit the <strong>Green Zone</strong> to prove you can run a front office.</p>
+    <div class="header-actions">
+        <button class="header-btn" onclick="showLeaderboard()">&#127942; Record Book</button>
+    </div>
 </header>
+
+<!-- ===== MANDATE BANNER ===== -->
+<div class="mandate-banner" id="mandateBanner">
+    <div class="mandate-emoji" id="mandateEmoji"></div>
+    <div class="mandate-name" id="mandateName"></div>
+    <div class="mandate-desc" id="mandateDesc"></div>
+    <div class="mandate-constraint" id="mandateConstraint" style="display:none;"></div>
+</div>
 
 <!-- ===== DASHBOARD ===== -->
 <section class="dashboard" id="dashboard">
     <div class="dash-top">
         <div class="budget-section">
             <span class="budget-label">Budget</span>
-            <div class="budget-bar-wrap"><div class="budget-bar" id="budgetBar"></div></div>
+            <div class="budget-bar-wrap">
+                <div class="luxury-tax-marker" title="Luxury Tax Threshold ($160M)"></div>
+                <div class="budget-bar" id="budgetBar"></div>
+            </div>
             <span class="budget-text" id="budgetText">$0M / $200M</span>
         </div>
-        <div style="display:flex; align-items:center; gap: 16px;">
+        <div style="display:flex; align-items:center; gap: 12px; flex-wrap: wrap;">
+            <div class="scout-tokens" id="scoutTokensDisplay">&#128270; Scouts: <strong id="scoutTokenCount">8</strong></div>
             <div class="roster-count">Roster: <strong id="rosterCount">0</strong>/9</div>
             <div class="owner-mood" id="ownerMood" data-tip="Owner is waiting...">&#128528;</div>
         </div>
@@ -936,6 +1439,16 @@
             <div class="stat-value" id="statFan">&mdash;</div>
             <div class="stat-sub">Star power</div>
         </div>
+        <div class="stat-card">
+            <div class="stat-label">3Y $/WAR</div>
+            <div class="stat-value" id="stat3YCPW">&mdash;</div>
+            <div class="stat-sub">3-year projection</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Cap Flex</div>
+            <div class="stat-value" id="statFlex">&mdash;</div>
+            <div class="stat-sub">Future flexibility</div>
+        </div>
     </div>
 
     <div class="efficiency-section">
@@ -950,10 +1463,27 @@
         <div class="eff-zones">
             <span>Red Zone (0-59)</span>
             <span>Yellow Zone (60-74)</span>
-            <span>Green Zone (75+)</span>
+            <span id="greenZoneLabel">Green Zone (75+)</span>
         </div>
+        <div class="synergy-bar" id="synergyBar"></div>
+        <div class="position-map" id="positionMap"></div>
+    </div>
+
+    <div class="playoff-section" id="playoffSection">
+        <div class="playoff-ring" id="playoffRing">
+            <div class="playoff-ring-inner" id="playoffPct">0%</div>
+        </div>
+        <div class="playoff-text" id="playoffText">Add players to see playoff projections.</div>
     </div>
 </section>
+
+<!-- ===== MEDIA TICKER ===== -->
+<div class="media-ticker" id="mediaTicker">
+    <div class="ticker-content" id="tickerContent">
+        <span class="ticker-label">BREAKING</span>
+        <span id="tickerText"></span>
+    </div>
+</div>
 
 <!-- ===== CONTROLS ===== -->
 <div class="controls">
@@ -966,7 +1496,10 @@
         <button class="sort-btn" data-sort="cpw" onclick="sortPlayers('cpw', this)">$/WAR</button>
         <button class="sort-btn" data-sort="fan" onclick="sortPlayers('fan', this)">Fan Appeal</button>
     </div>
-    <button class="reset-btn" onclick="resetGame()">Reset Roster</button>
+    <div class="ctrl-btn-group">
+        <button class="compare-btn" id="compareToggle" onclick="toggleCompareMode()">&#128200; Compare</button>
+        <button class="reset-btn" onclick="resetGame()">Reset Roster</button>
+    </div>
 </div>
 
 <!-- ===== PLAYER GRID ===== -->
@@ -980,11 +1513,48 @@
     </div>
 </div>
 
-<!-- ===== WIN/RESULT MODAL ===== -->
+<!-- ===== RESULT MODAL ===== -->
 <div class="modal-overlay win-modal" id="resultModal">
     <div class="modal">
         <button class="modal-close" onclick="closeResult()">&times;</button>
         <div id="resultContent"></div>
+    </div>
+</div>
+
+<!-- ===== SIMULATION MODAL ===== -->
+<div class="modal-overlay sim-modal" id="simModal">
+    <div class="modal">
+        <div id="simContent"></div>
+    </div>
+</div>
+
+<!-- ===== TRADE MODAL ===== -->
+<div class="modal-overlay trade-modal" id="tradeModal">
+    <div class="modal">
+        <div id="tradeContent"></div>
+    </div>
+</div>
+
+<!-- ===== QUIZ MODAL ===== -->
+<div class="modal-overlay quiz-modal" id="quizModal">
+    <div class="modal">
+        <div id="quizContent"></div>
+    </div>
+</div>
+
+<!-- ===== COMPARISON MODAL ===== -->
+<div class="modal-overlay compare-modal" id="compareModal">
+    <div class="modal">
+        <button class="modal-close" onclick="closeCompare()">&times;</button>
+        <div id="compareContent"></div>
+    </div>
+</div>
+
+<!-- ===== LEADERBOARD MODAL ===== -->
+<div class="modal-overlay lb-modal" id="lbModal">
+    <div class="modal">
+        <button class="modal-close" onclick="closeLB()">&times;</button>
+        <div id="lbContent"></div>
     </div>
 </div>
 
@@ -997,194 +1567,359 @@
 // ========================================
 const PLAYERS = [
     // ELITE TIER
-    {
-        id: 1, name: "Shohei Ohtani", position: "DH/P", age: 29,
-        war: 8.5, salary: 65.0, contractYears: 10, injuryRisk: 20, fanAppeal: 5,
-        tier: "elite", tierOrder: 0,
-        scout: "Generational two-way talent. Deferred salary helps, but the elbow history is real. The upside? There's nobody like him on Earth."
-    },
-    {
-        id: 2, name: "Aaron Judge", position: "OF", age: 32,
-        war: 7.0, salary: 40.0, contractYears: 5, injuryRisk: 30, fanAppeal: 5,
-        tier: "elite", tierOrder: 1,
-        scout: "6'7\" of raw power. MVP caliber when healthy — but that's the gamble. His size and age make durability a real question mark."
-    },
-    {
-        id: 3, name: "Juan Soto", position: "OF", age: 26,
-        war: 7.5, salary: 51.0, contractYears: 15, injuryRisk: 10, fanAppeal: 4,
-        tier: "elite", tierOrder: 2,
-        scout: "Elite plate discipline since age 19. Low risk, young, proven. The mega-contract eats cap space, but this is as safe as stars get."
-    },
-    {
-        id: 4, name: "Bobby Witt Jr.", position: "SS", age: 24,
-        war: 8.0, salary: 28.0, contractYears: 7, injuryRisk: 10, fanAppeal: 4,
-        tier: "elite", tierOrder: 3,
-        scout: "Five-tool superstar entering his prime. The rare case where the star IS the value pick. Elite production at a below-market price."
-    },
+    { id: 1, name: "Shohei Ohtani", position: "DH/P", posGroup: "DH", age: 29, war: 8.5, salary: 65.0, contractYears: 10, injuryRisk: 20, fanAppeal: 5, tier: "elite", tierOrder: 0,
+      warRange: [7.0, 10.0], riskLabel: "Med",
+      scout: "Generational two-way talent. Deferred salary helps, but the elbow history is real. The upside? There's nobody like him on Earth.",
+      injuryHeadline: "BREAKING: Shohei Ohtani reaggravates elbow, headed to IL for extended stint.",
+      breakoutHeadline: "Ohtani doing Ohtani things — on pace for 50 HR and 15 wins." },
+    { id: 2, name: "Aaron Judge", position: "OF", posGroup: "OF", age: 32, war: 7.0, salary: 40.0, contractYears: 5, injuryRisk: 30, fanAppeal: 5, tier: "elite", tierOrder: 1,
+      warRange: [4.5, 9.5], riskLabel: "High",
+      scout: "6'7\" of raw power. MVP caliber when healthy — but that's the gamble. His size and age make durability a real question mark.",
+      injuryHeadline: "BREAKING: Aaron Judge goes down with hamstring injury. Expected to miss 3 months.",
+      breakoutHeadline: "Judge on a tear — 20 HRs before the All-Star break!" },
+    { id: 3, name: "Juan Soto", position: "OF", posGroup: "OF", age: 26, war: 7.5, salary: 51.0, contractYears: 15, injuryRisk: 10, fanAppeal: 4, tier: "elite", tierOrder: 2,
+      warRange: [6.0, 9.0], riskLabel: "Low",
+      scout: "Elite plate discipline since age 19. Low risk, young, proven. The mega-contract eats cap space, but this is as safe as stars get.",
+      injuryHeadline: "Soto exits game with oblique tightness. Day-to-day.",
+      breakoutHeadline: "BREAKOUT: Juan Soto leads the league in OBP — again." },
+    { id: 4, name: "Bobby Witt Jr.", position: "SS", posGroup: "IF", age: 24, war: 8.0, salary: 28.0, contractYears: 7, injuryRisk: 10, fanAppeal: 4, tier: "elite", tierOrder: 3,
+      warRange: [6.5, 9.5], riskLabel: "Low",
+      scout: "Five-tool superstar entering his prime. The rare case where the star IS the value pick. Elite production at a below-market price.",
+      injuryHeadline: "Witt Jr. leaves game after awkward slide. X-rays pending.",
+      breakoutHeadline: "BREAKOUT: Bobby Witt Jr. joins the 30-30 club before age 25!" },
     // VALUE TIER
-    {
-        id: 5, name: "Gunnar Henderson", position: "SS/3B", age: 23,
-        war: 6.5, salary: 15.0, contractYears: 6, injuryRisk: 10, fanAppeal: 3,
-        tier: "value", tierOrder: 4,
-        scout: "Pre-arb stud with MVP-caliber upside. At $15M, you're getting $50M+ worth of production. Textbook front-office win."
-    },
-    {
-        id: 6, name: "Corbin Carroll", position: "OF", age: 24,
-        war: 5.0, salary: 10.0, contractYears: 6, injuryRisk: 15, fanAppeal: 3,
-        tier: "value", tierOrder: 5,
-        scout: "Elite speed, solid bat, developing power. His youth and controlled cost make him exactly the type of asset smart teams hoard."
-    },
-    {
-        id: 7, name: "Elly De La Cruz", position: "SS", age: 22,
-        war: 5.5, salary: 8.0, contractYears: 6, injuryRisk: 15, fanAppeal: 4,
-        tier: "value", tierOrder: 6,
-        scout: "The most electric athlete in baseball. 100 mph exit velos, 30 steals, highlight-reel defense. Strikeouts are the only question."
-    },
-    {
-        id: 8, name: "Julio Rodriguez", position: "OF", age: 23,
-        war: 5.0, salary: 14.0, contractYears: 8, injuryRisk: 15, fanAppeal: 4,
-        tier: "value", tierOrder: 7,
-        scout: "Locked into a team-friendly extension. Five-tool talent with star charisma. The long-term control is the real asset here."
-    },
-    {
-        id: 9, name: "Seth Lugo", position: "SP", age: 35,
-        war: 4.5, salary: 15.0, contractYears: 2, injuryRisk: 20, fanAppeal: 2,
-        tier: "value", tierOrder: 8,
-        scout: "Late bloomer putting up ace numbers. The age scares people off, which is exactly why the price is right. Short-term value play."
-    },
-    {
-        id: 10, name: "Cal Raleigh", position: "C", age: 28,
-        war: 5.5, salary: 17.5, contractYears: 6, injuryRisk: 10, fanAppeal: 3,
-        tier: "value", tierOrder: 9,
-        scout: "Elite defensive catcher with 30-HR power. The catching position is so thin that his value per dollar is off the charts."
-    },
+    { id: 5, name: "Gunnar Henderson", position: "SS/3B", posGroup: "IF", age: 23, war: 6.5, salary: 15.0, contractYears: 6, injuryRisk: 10, fanAppeal: 3, tier: "value", tierOrder: 4,
+      warRange: [4.5, 8.5], riskLabel: "Low",
+      scout: "Pre-arb stud with MVP-caliber upside. At $15M, you're getting $50M+ worth of production. Textbook front-office win.",
+      injuryHeadline: "Henderson dealing with wrist soreness, sits out series.",
+      breakoutHeadline: "BREAKOUT: Gunnar Henderson leading AL in total bases!" },
+    { id: 6, name: "Corbin Carroll", position: "OF", posGroup: "OF", age: 24, war: 5.0, salary: 10.0, contractYears: 6, injuryRisk: 15, fanAppeal: 3, tier: "value", tierOrder: 5,
+      warRange: [3.0, 7.0], riskLabel: "Low",
+      scout: "Elite speed, solid bat, developing power. His youth and controlled cost make him exactly the type of asset smart teams hoard.",
+      injuryHeadline: "Carroll lands on IL with shoulder strain after diving catch.",
+      breakoutHeadline: "BREAKOUT: Corbin Carroll steals 40 bases in first half!" },
+    { id: 7, name: "Elly De La Cruz", position: "SS", posGroup: "IF", age: 22, war: 5.5, salary: 8.0, contractYears: 6, injuryRisk: 15, fanAppeal: 4, tier: "value", tierOrder: 6,
+      warRange: [3.5, 7.5], riskLabel: "Low",
+      scout: "The most electric athlete in baseball. 100 mph exit velos, 30 steals, highlight-reel defense. Strikeouts are the only question.",
+      injuryHeadline: "De La Cruz tweaks ankle on stolen base attempt.",
+      breakoutHeadline: "BREAKOUT: Elly De La Cruz on fire — 15-game hitting streak!" },
+    { id: 8, name: "Julio Rodriguez", position: "OF", posGroup: "OF", age: 23, war: 5.0, salary: 14.0, contractYears: 8, injuryRisk: 15, fanAppeal: 4, tier: "value", tierOrder: 7,
+      warRange: [3.0, 7.0], riskLabel: "Low",
+      scout: "Locked into a team-friendly extension. Five-tool talent with star charisma. The long-term control is the real asset here.",
+      injuryHeadline: "J-Rod dealing with knee inflammation, moved to DH.",
+      breakoutHeadline: "BREAKOUT: Julio Rodriguez homers in 5 straight games!" },
+    { id: 9, name: "Seth Lugo", position: "SP", posGroup: "SP", age: 35, war: 4.5, salary: 15.0, contractYears: 2, injuryRisk: 20, fanAppeal: 2, tier: "value", tierOrder: 8,
+      warRange: [2.5, 6.5], riskLabel: "Med",
+      scout: "Late bloomer putting up ace numbers. The age scares people off, which is exactly why the price is right. Short-term value play.",
+      injuryHeadline: "Lugo scratched from start with forearm tightness.",
+      breakoutHeadline: "Lugo continues dominant stretch — sub-2.50 ERA." },
+    { id: 10, name: "Cal Raleigh", position: "C", posGroup: "C", age: 28, war: 5.5, salary: 17.5, contractYears: 6, injuryRisk: 10, fanAppeal: 3, tier: "value", tierOrder: 9,
+      warRange: [3.5, 7.5], riskLabel: "Low",
+      scout: "Elite defensive catcher with 30-HR power. The catching position is so thin that his value per dollar is off the charts.",
+      injuryHeadline: "Raleigh takes foul tip off hand, precautionary X-rays.",
+      breakoutHeadline: "Steady as expected — Cal Raleigh anchoring the lineup." },
     // TRAP TIER
-    {
-        id: 11, name: "Mookie Betts", position: "SS/OF", age: 32,
-        war: 4.0, salary: 30.5, contractYears: 5, injuryRisk: 25, fanAppeal: 4,
-        tier: "trap", tierOrder: 10,
-        scout: "Former MVP still producing — but at $30M for 4 WAR, you're paying for the brand, not the bargain. The jersey sells. The analytics say 'pass.'"
-    },
-    {
-        id: 12, name: "Trea Turner", position: "SS", age: 31,
-        war: 3.0, salary: 27.0, contractYears: 7, injuryRisk: 30, fanAppeal: 3,
-        tier: "trap", tierOrder: 11,
-        scout: "Speed is the first tool to go, and the hamstrings are a recurring nightmare. Seven years left on this deal. The definition of albatross risk."
-    },
-    {
-        id: 13, name: "Carlos Correa", position: "SS", age: 30,
-        war: 3.5, salary: 33.0, contractYears: 8, injuryRisk: 35, fanAppeal: 3,
-        tier: "trap", tierOrder: 12,
-        scout: "Talented but fragile. The back issues are chronic, not acute. At $33M/yr with 8 years left, this contract could cripple your cap flexibility."
-    },
-    {
-        id: 14, name: "Max Scherzer", position: "SP", age: 40,
-        war: 2.0, salary: 22.0, contractYears: 1, injuryRisk: 45, fanAppeal: 3,
-        tier: "trap", tierOrder: 13,
-        scout: "Hall of Fame arm, but Father Time is undefeated. $11M per WAR with a coin-flip chance of even pitching. A nostalgia signing, not a smart one."
-    },
-    {
-        id: 15, name: "Justin Verlander", position: "SP", age: 41,
-        war: 1.5, salary: 25.0, contractYears: 1, injuryRisk: 50, fanAppeal: 3,
-        tier: "trap", tierOrder: 14,
-        scout: "Living legend — but $16.7M per WAR is the worst rate on this board. You're paying for the Hall of Fame plaque, not next season's wins."
-    },
+    { id: 11, name: "Mookie Betts", position: "SS/OF", posGroup: "IF", age: 32, war: 4.0, salary: 30.5, contractYears: 5, injuryRisk: 25, fanAppeal: 4, tier: "trap", tierOrder: 10,
+      warRange: [2.0, 6.0], riskLabel: "Med-High",
+      scout: "Former MVP still producing — but at $30M for 4 WAR, you're paying for the brand, not the bargain.",
+      injuryHeadline: "Betts fractures hand on HBP. Out 6-8 weeks.",
+      breakoutHeadline: "Betts turning back the clock — Gold Glove defense at short." },
+    { id: 12, name: "Trea Turner", position: "SS", posGroup: "IF", age: 31, war: 3.0, salary: 27.0, contractYears: 7, injuryRisk: 30, fanAppeal: 3, tier: "trap", tierOrder: 11,
+      warRange: [1.0, 5.0], riskLabel: "High",
+      scout: "Speed is the first tool to go, and the hamstrings are a recurring nightmare. The definition of albatross risk.",
+      injuryHeadline: "BREAKING: Trea Turner re-injures hamstring. Headed to 60-day IL.",
+      breakoutHeadline: "Turner looks healthy — 3 steals in tonight's win." },
+    { id: 13, name: "Carlos Correa", position: "SS", posGroup: "IF", age: 30, war: 3.5, salary: 33.0, contractYears: 8, injuryRisk: 35, fanAppeal: 3, tier: "trap", tierOrder: 12,
+      warRange: [1.5, 5.5], riskLabel: "High",
+      scout: "Talented but fragile. The back issues are chronic. At $33M/yr with 8 years left, this contract could cripple your cap flexibility.",
+      injuryHeadline: "BREAKING: Correa's back flares up again. Third IL stint this season.",
+      breakoutHeadline: "Correa drives in 5 — back looking healthy so far." },
+    { id: 14, name: "Max Scherzer", position: "SP", posGroup: "SP", age: 40, war: 2.0, salary: 22.0, contractYears: 1, injuryRisk: 45, fanAppeal: 3, tier: "trap", tierOrder: 13,
+      warRange: [0.5, 3.5], riskLabel: "Very High",
+      scout: "Hall of Fame arm, but Father Time is undefeated. A nostalgia signing, not a smart one.",
+      injuryHeadline: "BREAKING: Scherzer shut down with nerve issue in pitching arm. Season over.",
+      breakoutHeadline: "Mad Max still has it — 10 Ks in vintage performance." },
+    { id: 15, name: "Justin Verlander", position: "SP", posGroup: "SP", age: 41, war: 1.5, salary: 25.0, contractYears: 1, injuryRisk: 50, fanAppeal: 3, tier: "trap", tierOrder: 14,
+      warRange: [0.5, 3.0], riskLabel: "Extreme",
+      scout: "Living legend — but $16.7M per WAR is the worst rate on this board. You're paying for the plaque, not next season.",
+      injuryHeadline: "BREAKING: Verlander suffers neck strain. Will not return this season.",
+      breakoutHeadline: "Verlander defies age — complete game shutout at 41!" },
     // HIDDEN GEM TIER
-    {
-        id: 16, name: "Ezequiel Tovar", position: "SS", age: 23,
-        war: 4.5, salary: 5.0, contractYears: 6, injuryRisk: 10, fanAppeal: 2,
-        tier: "gem", tierOrder: 15,
-        scout: "Nobody outside Colorado talks about him — and that's your edge. $1.1M per WAR is absurd value. The Moneyball pick of this board."
+    { id: 16, name: "Ezequiel Tovar", position: "SS", posGroup: "IF", age: 23, war: 4.5, salary: 5.0, contractYears: 6, injuryRisk: 10, fanAppeal: 2, tier: "gem", tierOrder: 15,
+      warRange: [2.5, 6.5], riskLabel: "Low",
+      scout: "Nobody outside Colorado talks about him — and that's your edge. The Moneyball pick of this board.",
+      injuryHeadline: "Tovar hit by pitch on wrist, leaves game.",
+      breakoutHeadline: "BREAKOUT: Tovar's bat comes alive — hitting .310 in June!" },
+    { id: 17, name: "Jarren Duran", position: "OF", posGroup: "OF", age: 28, war: 4.0, salary: 6.0, contractYears: 4, injuryRisk: 10, fanAppeal: 2, tier: "gem", tierOrder: 16,
+      warRange: [2.0, 6.0], riskLabel: "Low",
+      scout: "Breakout 2024 All-Star nobody saw coming. At $6M, he's a rounding error on your payroll but a real contributor.",
+      injuryHeadline: "Duran collides with outfield wall. Concussion protocol.",
+      breakoutHeadline: "Duran proving last year was no fluke — All-Star again." },
+    { id: 18, name: "Paul Skenes", position: "SP", posGroup: "SP", age: 23, war: 5.5, salary: 3.0, contractYears: 6, injuryRisk: 15, fanAppeal: 4, tier: "gem", tierOrder: 17,
+      warRange: [3.5, 7.5], riskLabel: "Low",
+      scout: "Rookie phenom with a 100-mph fastball. At $3M, this is the single best value on the entire board.",
+      injuryHeadline: "Skenes feels elbow tightness after outing. MRI scheduled.",
+      breakoutHeadline: "BREAKOUT: Skenes strikes out 14 — Cy Young frontrunner!" },
+    { id: 19, name: "Cristopher Sanchez", position: "SP", posGroup: "SP", age: 28, war: 5.0, salary: 4.0, contractYears: 5, injuryRisk: 10, fanAppeal: 2, tier: "gem", tierOrder: 18,
+      warRange: [3.0, 7.0], riskLabel: "Low",
+      scout: "Ace production at a relief pitcher's salary. Pure analytics play.",
+      injuryHeadline: "Sanchez scratched with minor blister issue.",
+      breakoutHeadline: "Sanchez dealing — 30 consecutive scoreless innings!" },
+    { id: 20, name: "Luis Arraez", position: "1B/2B", posGroup: "IF", age: 27, war: 3.5, salary: 12.0, contractYears: 5, injuryRisk: 10, fanAppeal: 2, tier: "gem", tierOrder: 19,
+      warRange: [1.5, 5.5], riskLabel: "Low",
+      scout: "Three batting titles by age 27. Doesn't hit homers — but puts the bat on the ball better than anyone alive.",
+      injuryHeadline: "Arraez dealing with knee soreness, day-to-day.",
+      breakoutHeadline: "Arraez chasing .400 into June — contact king." }
+];
+
+// ========================================
+// POSITION REQUIREMENTS
+// ========================================
+const POSITION_REQUIREMENTS = { C: 1, SP: 2, OF: 2, IF: 2 }; // remaining 2 = flex
+
+function getPositionFill(selectedPlayers) {
+    const needs = { C: 1, SP: 2, OF: 2, IF: 2 };
+    const filled = { C: 0, SP: 0, OF: 0, IF: 0 };
+    const assigned = new Map();
+    // Priority assignment: single-position players first
+    const sorted = [...selectedPlayers].sort((a, b) => {
+        const aPosCount = a.position.split('/').length;
+        const bPosCount = b.position.split('/').length;
+        return aPosCount - bPosCount;
+    });
+    for (const p of sorted) {
+        const groups = [];
+        const positions = p.position.split('/');
+        for (const pos of positions) {
+            if (pos === 'C') groups.push('C');
+            else if (pos === 'SP' || pos === 'P') groups.push('SP');
+            else if (pos === 'OF') groups.push('OF');
+            else if (['SS','3B','1B','2B'].includes(pos)) groups.push('IF');
+            else if (pos === 'DH') {} // flex only
+        }
+        let placed = false;
+        for (const g of groups) {
+            if (filled[g] < needs[g]) {
+                filled[g]++;
+                assigned.set(p.id, g);
+                placed = true;
+                break;
+            }
+        }
+        if (!placed) assigned.set(p.id, 'FLEX');
+    }
+    return { filled, needs, assigned };
+}
+
+function positionsMet(selectedPlayers) {
+    const { filled, needs } = getPositionFill(selectedPlayers);
+    return Object.keys(needs).every(k => filled[k] >= needs[k]);
+}
+
+function getMissingPositions(selectedPlayers) {
+    const { filled, needs } = getPositionFill(selectedPlayers);
+    const missing = [];
+    for (const k of Object.keys(needs)) {
+        if (filled[k] < needs[k]) missing.push(`${k} (need ${needs[k] - filled[k]} more)`);
+    }
+    return missing;
+}
+
+// ========================================
+// OWNER MANDATES
+// ========================================
+const MANDATES = [
+    { id: 'win_now', name: 'Win Now', emoji: '\u{1F525}',
+      description: 'The owner wants a championship THIS YEAR. Load up on talent — cost is secondary.',
+      constraint: 'WAR below 40 caps efficiency at 60',
+      budgetOverride: null,
+      weightOverrides: { war: 0.40, value: 0.15, risk: 0.20, age: 0.15, chem: 0.10 },
+      hardCaps: { minWAR: 40, capAt: 60 },
+      greenZone: 75
     },
-    {
-        id: 17, name: "Jarren Duran", position: "OF", age: 28,
-        war: 4.0, salary: 6.0, contractYears: 4, injuryRisk: 10, fanAppeal: 2,
-        tier: "gem", tierOrder: 16,
-        scout: "Breakout 2024 All-Star nobody saw coming. At $6M, he's a rounding error on your payroll but a real contributor on your roster."
+    { id: 'moneyball', name: 'Moneyball Mode', emoji: '\u{1F4B0}',
+      description: 'Budget slashed to $120M. Find maximum value with minimum spending.',
+      constraint: 'Budget reduced to $120M',
+      budgetOverride: 120,
+      weightOverrides: { war: 0.25, value: 0.35, risk: 0.15, age: 0.15, chem: 0.10 },
+      hardCaps: null,
+      greenZone: 75
     },
-    {
-        id: 18, name: "Paul Skenes", position: "SP", age: 23,
-        war: 5.5, salary: 3.0, contractYears: 6, injuryRisk: 15, fanAppeal: 4,
-        tier: "gem", tierOrder: 17,
-        scout: "Rookie phenom with a 100-mph fastball and a sweeper that breaks bats. At $3M, this is the single best value on the entire board."
+    { id: 'brand', name: 'Build the Brand', emoji: '\u{2B50}',
+      description: 'The owner wants butts in seats. Sign stars the fans love — at least 3 players with 4+ star fan appeal.',
+      constraint: 'Must have 3+ players with 4\u2605+ appeal',
+      budgetOverride: null,
+      weightOverrides: { war: 0.25, value: 0.20, risk: 0.15, age: 0.10, chem: 0.15, fan: 0.15 },
+      hardCaps: { minFanStars: 3 },
+      greenZone: 75
     },
-    {
-        id: 19, name: "Cristopher Sanchez", position: "SP", age: 28,
-        war: 5.0, salary: 4.0, contractYears: 5, injuryRisk: 10, fanAppeal: 2,
-        tier: "gem", tierOrder: 18,
-        scout: "Ace production at a relief pitcher's salary. Nobody's heard of him, which is exactly why you can afford him. Pure analytics play."
+    { id: 'youth', name: 'Youth Movement', emoji: '\u{1F331}',
+      description: 'Build for the future. No players over age 30 allowed.',
+      constraint: 'No players over age 30',
+      budgetOverride: null,
+      weightOverrides: { war: 0.20, value: 0.25, risk: 0.15, age: 0.25, chem: 0.15 },
+      hardCaps: { maxAge: 30 },
+      greenZone: 75
     },
-    {
-        id: 20, name: "Luis Arraez", position: "1B/2B", age: 27,
-        war: 3.5, salary: 12.0, contractYears: 5, injuryRisk: 10, fanAppeal: 2,
-        tier: "gem", tierOrder: 19,
-        scout: "Three batting titles by age 27. Doesn't hit homers, doesn't make SportsCenter — but puts the bat on the ball better than anyone alive."
+    { id: 'protect', name: 'Protect the Investment', emoji: '\u{1F6E1}\u{FE0F}',
+      description: 'Risk management is priority #1. Keep average injury risk under 15%.',
+      constraint: 'Avg risk must stay under 15%',
+      budgetOverride: null,
+      weightOverrides: { war: 0.20, value: 0.20, risk: 0.30, age: 0.15, chem: 0.15 },
+      hardCaps: { maxAvgRisk: 15 },
+      greenZone: 75
+    },
+    { id: 'championship', name: 'Championship Window', emoji: '\u{1F3C6}',
+      description: 'Go big or go home. Must include at least 2 Elite-tier players. Green Zone raised to 80.',
+      constraint: 'Must have 2+ Elite-tier players. Green Zone = 80.',
+      budgetOverride: null,
+      weightOverrides: { war: 0.30, value: 0.20, risk: 0.20, age: 0.15, chem: 0.15 },
+      hardCaps: { minElite: 2 },
+      greenZone: 80
     }
 ];
+
+// ========================================
+// SYNERGIES
+// ========================================
+const SYNERGIES = [
+    { name: "Mentor Pair", emoji: "\u{1F9D1}\u200D\u{1F3EB}", bonus: 3,
+      flavor: "Veteran leadership accelerates young talent development",
+      test: (ps) => ps.some(p => p.age >= 30) && ps.some(p => p.age <= 24) },
+    { name: "Ace Rotation", emoji: "\u{1F4AA}", bonus: 4,
+      flavor: "Dominant 1-2 punch at the top of the rotation",
+      test: (ps) => ps.filter(p => p.posGroup === 'SP' && p.war >= 4.5).length >= 2 },
+    { name: "Core Four", emoji: "\u{1F91D}", bonus: 4,
+      flavor: "Championship-window core locked in together",
+      test: (ps) => ps.filter(p => p.age >= 23 && p.age <= 27).length >= 4 },
+    { name: "Franchise Face", emoji: "\u{1F31F}", bonus: 3,
+      flavor: "Superstar elevates the entire brand",
+      test: (ps) => ps.some(p => p.fanAppeal === 5) && (ps.reduce((s,p)=>s+p.fanAppeal,0)/ps.length) >= 3.0 },
+    { name: "Moneyball Squad", emoji: "\u{1F4B5}", bonus: 5,
+      flavor: "Billy Beane would be proud — maximum efficiency",
+      test: (ps) => { const total = ps.reduce((s,p)=>s+p.salary,0); const war = ps.reduce((s,p)=>s+p.war,0); return war > 0 && (total/war) < 3.0; } },
+    // Penalties
+    { name: "Injury Ward", emoji: "\u{1F3E5}", bonus: -5,
+      flavor: "Your medical staff is overwhelmed",
+      test: (ps) => ps.filter(p => p.injuryRisk >= 25).length >= 3 },
+    { name: "Retirement Home", emoji: "\u{1F9D3}", bonus: -4,
+      flavor: "Average AARP eligibility, not championship eligibility",
+      test: (ps) => ps.filter(p => p.age >= 33).length >= 3 },
+    { name: "No-Name Roster", emoji: "\u{1F47B}", bonus: -3,
+      flavor: "Nobody's buying tickets to see this team",
+      test: (ps) => !ps.some(p => p.fanAppeal >= 4) }
+];
+
+// ========================================
+// QUIZ POOL
+// ========================================
+const QUIZ_POOL = [
+    { question: "Player X earns $30M and projects 4.0 WAR. Player Y earns $8M and projects 3.0 WAR. Which is the better VALUE?",
+      options: ["Player X — higher WAR means more value", "Player Y — $2.67M/WAR vs $7.5M/WAR", "They're equal value", "Need more information"],
+      correctIndex: 1, explanation: "Value = production per dollar. Y costs $2.67M per WAR vs X's $7.5M per WAR. Y gives you 2.8x more value per dollar." },
+    { question: "A player has 6.0 projected WAR and 40% injury risk. What is their expected WAR?",
+      options: ["6.0 — WAR doesn't change", "3.6 — multiply WAR by healthy probability", "2.4 — multiply WAR by risk", "4.0 — subtract the risk percentage"],
+      correctIndex: 1, explanation: "Expected WAR = WAR x (1 - risk). 6.0 x 0.60 = 3.6. You multiply by the probability they STAY healthy." },
+    { question: "You can sign a 25-year-old (5.0 WAR) or a 33-year-old (6.0 WAR) to a 5-year deal. Who gives more total value?",
+      options: ["The 33-year-old — 6.0 WAR is higher right now", "The 25-year-old — their WAR grows while the veteran's declines", "Whichever costs less", "The older player is always safer"],
+      correctIndex: 1, explanation: "The 25-year-old's WAR improves each year (5.0 > 5.3 > 5.6...) while the 33-year-old declines (6.0 > 5.2 > 4.4...). Over 5 years, youth wins." },
+    { question: "You spend $45M on a veteran. Next summer, a young superstar hits free agency at $20M. What concept describes what you lost?",
+      options: ["Sunk cost", "Opportunity cost", "Supply and demand", "Diminishing returns"],
+      correctIndex: 1, explanation: "Opportunity cost — by committing $45M now, you can't afford the $20M superstar later. Every dollar spent is a dollar unavailable for future moves." },
+    { question: "You signed a player for $30M but he's hurt and producing 1.0 WAR. Should you keep starting him because you paid so much?",
+      options: ["Yes — you need to get your money's worth", "No — that's the sunk cost fallacy", "Yes — benching him wastes the investment", "It depends on his contract length"],
+      correctIndex: 1, explanation: "The $30M is already spent (sunk). Starting decisions should be based on CURRENT production, not past spending. That's the sunk cost fallacy." },
+    { question: "Two pitchers: Pitcher A has 4.0 WAR, $4M salary. Pitcher B has 5.0 WAR, $22M salary. Your budget is tight. Who should you sign?",
+      options: ["Pitcher B — more WAR is always better", "Pitcher A — $1M/WAR vs $4.4M/WAR, reinvest the $18M savings", "Neither — find a free agent", "Pitcher B — the extra 1.0 WAR is worth it"],
+      correctIndex: 1, explanation: "Pitcher A at $1M/WAR is elite value. The $18M saved can buy ~4-5 additional WAR elsewhere. Total roster WAR is what matters, not individual WAR." },
+    { question: "What does the 'age curve' tell us about a 35-year-old player's likely trajectory?",
+      options: ["They'll maintain current production", "They're likely to improve with experience", "They're likely to decline significantly each year", "Age doesn't predict performance"],
+      correctIndex: 2, explanation: "Research shows players decline ~0.8 WAR/year after 33 and ~1.0 WAR/year after 36. A 35-year-old with 4.0 WAR projects ~3.2 next year and ~2.4 the year after." },
+    { question: "A team spends $180M total salary in a league with a $160M luxury tax threshold. What is the tax penalty?",
+      options: ["$0 — they're under $200M", "$20M in fines", "-10 efficiency points at $0.5/M over threshold", "They're blocked from signing more players"],
+      correctIndex: 2, explanation: "Each $1M over the $160M threshold costs -0.5 efficiency points. $180M - $160M = $20M over x 0.5 = -10 point penalty." },
+    { question: "Why are pre-arbitration players (young, team-controlled) so valuable to front offices?",
+      options: ["They always perform better than veterans", "They provide premium production at a fraction of market price", "They have no injury risk", "Fans prefer young players"],
+      correctIndex: 1, explanation: "Pre-arb players like Paul Skenes ($3M for 5.5 WAR = $0.5M/WAR) provide star production at minimum salaries. That's 15-20x better value than market rate." },
+    { question: "Your roster has 5 players with 10-15% injury risk and 4 players with 30%+ risk. What's the biggest concern?",
+      options: ["Not enough star power", "Too many high-risk players could collapse your expected WAR", "The low-risk players are boring", "Injury risk doesn't matter over a full season"],
+      correctIndex: 1, explanation: "With 4 high-risk players, there's a very high probability at least 1-2 get hurt. Your expected roster WAR drops significantly. Diversifying risk protects your floor." }
+];
+
+// ========================================
+// ACHIEVEMENTS
+// ========================================
+const ACHIEVEMENTS = [
+    { id: 'moneyball_master', name: "Moneyball Master", emoji: "\u{1F4B0}", test: (r) => r.mandate === 'moneyball' && r.finalEfficiency >= 80 },
+    { id: 'win_now_champ', name: "Win Now Champion", emoji: "\u{1F3C6}", test: (r) => r.mandate === 'win_now' && r.finalEfficiency >= 75 },
+    { id: 'youth_director', name: "Youth Director", emoji: "\u{1F331}", test: (r) => r.avgAge < 25 },
+    { id: 'risk_manager', name: "Risk Manager", emoji: "\u{1F6E1}\u{FE0F}", test: (r) => r.avgRisk < 12 },
+    { id: 'budget_hawk', name: "Budget Hawk", emoji: "\u{1F4B5}", test: (r) => r.totalSalary < 100 },
+    { id: 'fan_favorite', name: "Fan Favorite", emoji: "\u{2B50}", test: (r) => r.avgFan >= 4.0 },
+    { id: 'perfect_scout', name: "Perfect Scout", emoji: "\u{1F50D}", test: (r) => r.allScouted === true },
+    { id: 'trade_genius', name: "Trade Genius", emoji: "\u{1F504}", test: (r) => r.tradeImproved === true },
+    { id: 'quiz_ace', name: "Quiz Ace", emoji: "\u{1F4AF}", test: (r) => r.quizScore === 3 },
+    { id: 'survivor', name: "Survivor", emoji: "\u{1F9BE}", test: (r) => r.injuryCount >= 2 && r.finalEfficiency >= 75 },
+    { id: 'grand_slam', name: "Grand Slam", emoji: "\u{1F48E}", test: (r) => r.finalEfficiency >= 90 },
+    { id: 'complete_gm', name: "Complete GM", emoji: "\u{1F451}", test: (r) => r.unlockedCount >= 11 }
+];
+
+// ========================================
+// HEADLINE TEMPLATES
+// ========================================
+const HEADLINES = {
+    elite_sign: [
+        "BLOCKBUSTER! {name} joins the franchise. This changes everything!",
+        "Fans are ELECTRIC! {name} is a game-changer signing!"
+    ],
+    trap_sign: [
+        "BLOCKBUSTER! Future Hall of Famer {name} joins the franchise. Fans are electric!",
+        "Legacy signing! {name} brings championship experience and star power."
+    ],
+    gem_sign: [
+        "Who? GM makes puzzling move on under-the-radar {name}.",
+        "Fans confused as {name} signing draws crickets. What does the front office see?"
+    ],
+    value_sign: [
+        "Solid move. {name} brings steady production at a fair price.",
+        "{name} signed — a workmanlike addition to the roster."
+    ],
+    cheap_streak: [
+        "Is this GM allergic to star power? Fans demand excitement.",
+        "Three straight bargain picks. Fans booing from their couches."
+    ],
+    big_spender: [
+        "GM goes ALL IN! Championship-or-bust mentality!",
+        "The checkbook is OPEN! Big-market spending on full display."
+    ],
+    young_roster: [
+        "Rebuilding?! Fans want wins NOW, not in 3 years.",
+        "The kids table is full — where are the proven veterans?"
+    ],
+    smart_money: [
+        "SMART MONEY: {name} locked up at a bargain price. Analytics department high-fiving.",
+        "Under the radar and under budget — {name} is a savvy pickup."
+    ]
+};
 
 // ========================================
 // INFO CONTENT
 // ========================================
 const INFO = {
-    war: {
-        title: "&#9918; WAR — Wins Above Replacement",
-        body: `<p><strong>WAR</strong> measures how many additional wins a player contributes compared to a freely available minor-league replacement player.</p>
-        <p>Think of it as one number that captures a player's total value — offense, defense, baserunning — rolled into a single stat.</p>
-        <div class="formula">2 WAR = Average starter<br>4-5 WAR = All-Star level<br>7+ WAR = MVP candidate<br>10+ WAR = Historic season</div>
-        <p>WAR isn't perfect — it doesn't capture leadership, clubhouse presence, or clutch performance. But it's the closest thing to a "total value" number in baseball.</p>
-        <p>In this game, your <strong>Total WAR</strong> represents your roster's raw talent level. Aim for <strong>35-45 combined WAR</strong> for a playoff-caliber team.</p>`
-    },
-    adjwar: {
-        title: "&#128202; Adjusted WAR — Expected Value",
-        body: `<p><strong>Adjusted WAR</strong> is each player's WAR multiplied by the probability they actually stay healthy and play.</p>
-        <div class="formula">Adjusted WAR = WAR &times; (1 - Injury Risk %)</div>
-        <p>This is <strong>expected value</strong> in action — the same concept from Module 2's Player Economics lessons.</p>
-        <p>Example: Aaron Judge projects for <strong>7.0 WAR</strong>, but his injury risk is <strong>30%</strong>. His expected (adjusted) WAR is only <strong>4.9</strong>.</p>
-        <p>Meanwhile, Bobby Witt Jr. projects <strong>8.0 WAR</strong> with just <strong>10% injury risk</strong> = <strong>7.2 adjusted WAR</strong>. That's 47% more expected production.</p>
-        <p>Smart front offices don't bet on best-case scenarios. They plan for <strong>expected outcomes</strong>.</p>`
-    },
-    cpw: {
-        title: "&#128176; $/WAR — Cost Per Win",
-        body: `<p><strong>Cost per WAR</strong> tells you how many million dollars you're paying for each win a player adds. It's the core Moneyball insight.</p>
-        <div class="formula">$/WAR = Annual Salary &divide; Projected WAR<br><br>Market rate: ~$8-10M per WAR<br>Bargain: Under $5M/WAR<br>Overpaying: Over $10M/WAR</div>
-        <p>Example: Justin Verlander at <strong>$25M for 1.5 WAR = $16.7M per win</strong>. That's almost double market rate.</p>
-        <p>Paul Skenes at <strong>$3M for 5.5 WAR = $0.5M per win</strong>. That's the best deal on the board — 33x more efficient than Verlander.</p>
-        <p>This is why <strong>pre-arbitration players</strong> (young, controlled) are the real currency of front offices. You're getting premium production at a fraction of the price.</p>`
-    },
-    age: {
-        title: "&#128200; Age Curve — Peak Performance Windows",
-        body: `<p>Players don't perform at the same level forever. Research shows baseball players typically:</p>
-        <div class="formula">Peak performance: Ages 25-28<br>Gradual decline: ~0.5 WAR per year after 30<br>Sharp decline: After 35</div>
-        <p>When you sign a <strong>24-year-old</strong>, you're buying into their upside — they haven't peaked yet. When you sign a <strong>33-year-old</strong>, you're paying for who they were, not who they'll be.</p>
-        <p>That's the <strong>opportunity cost</strong> concept: every dollar locked into an aging veteran is a dollar you can't spend on a young breakout next summer.</p>
-        <p>Your dashboard's <strong>Avg Age</strong> should ideally be <strong>25-28</strong>. That means your core is in or approaching their prime — giving you both current production AND future upside.</p>`
-    },
-    risk: {
-        title: "&#9888;&#65039; Injury Risk — The Hidden Cost",
-        body: `<p>Injury risk is the percentage chance a player misses significant time. It's based on injury history, age, playing style, and position.</p>
-        <div class="formula">Low risk: 10-15% (reliable, durable)<br>Moderate risk: 20-25% (some concern)<br>High risk: 30%+ (major red flag)<br>Extreme risk: 45%+ (betting on luck)</div>
-        <p>A player's <strong>real value</strong> isn't their ceiling — it's their ceiling adjusted for the chance they actually reach it.</p>
-        <p>Max Scherzer might be brilliant when healthy, but at <strong>45% injury risk</strong>, you're basically flipping a coin on whether he even pitches.</p>
-        <p>This connects directly to <strong>expected value</strong>: Risk-adjusted thinking is what separates gamblers from general managers.</p>`
-    },
-    fan: {
-        title: "&#11088; Fan Appeal — Beyond the Numbers",
-        body: `<p><strong>Fan Appeal</strong> captures the intangibles that don't show up in WAR: ticket sales, jersey revenue, media attention, free-agent attraction, and locker room energy.</p>
-        <div class="formula">&#11088;&#11088;&#11088;&#11088;&#11088; = Franchise face (Ohtani, Judge)<br>&#11088;&#11088;&#11088;&#11088; = Star draw (Soto, Skenes)<br>&#11088;&#11088;&#11088; = Solid name recognition<br>&#11088;&#11088; = Under the radar<br>&#11088; = Analytics-only pick</div>
-        <p>This is the <strong>GM's dilemma</strong>: data says Cristopher Sanchez ($0.8M/WAR) is a better signing than Mookie Betts ($7.6M/WAR). But Betts sells tickets, attracts other stars, and energizes a fanbase.</p>
-        <p>Data narrows the range of mistakes — but it doesn't eliminate the human side of the job. A great GM balances both.</p>`
-    },
-    efficiency: {
-        title: "&#127942; Efficiency Score — The Efficient Frontier",
-        body: `<p>Your <strong>Efficiency Score</strong> is a weighted composite that measures how well you've balanced every dimension of roster-building:</p>
-        <div class="formula">Efficiency = (WAR &times; 30%) + (Value &times; 25%)<br>&nbsp;&nbsp;+ (Risk &times; 20%) + (Age &times; 15%)<br>&nbsp;&nbsp;+ (Chemistry &times; 10%)</div>
-        <p><strong>WAR Score (30%)</strong> — Did you acquire enough raw talent? Target: 35-45 total WAR.</p>
-        <p><strong>Value Score (25%)</strong> — Are you getting good deals? Low $/WAR = Moneyball efficiency.</p>
-        <p><strong>Risk Score (20%)</strong> — Are your wins reliable? Low injury risk = high expected value.</p>
-        <p><strong>Age Score (15%)</strong> — Is your core in their prime window (25-28)? Young = upside + flexibility.</p>
-        <p><strong>Chemistry Score (10%)</strong> — Do you have star power AND positional balance?</p>
-        <p>This mirrors the <strong>efficient frontier</strong> concept from economics: the best combination of return (wins), cost (salary), and risk (injuries). Score <strong>75+</strong> to enter the Green Zone.</p>`
-    }
+    war: { title: "\u26BE WAR \u2014 Wins Above Replacement",
+      body: '<p><strong>WAR</strong> measures how many additional wins a player contributes compared to a replacement-level player.</p><div class="formula">2 WAR = Average starter<br>4-5 WAR = All-Star level<br>7+ WAR = MVP candidate</div><p>Your <strong>Total WAR</strong> represents raw roster talent. Aim for <strong>35-45 combined WAR</strong>.</p>' },
+    adjwar: { title: "\u{1F4CA} Adjusted WAR \u2014 Expected Value",
+      body: '<p><strong>Adjusted WAR</strong> = WAR \u00D7 (1 - Injury Risk %). This is <strong>expected value</strong> in action.</p><div class="formula">Adjusted WAR = WAR \u00D7 (1 - Injury Risk %)</div><p>Judge: 7.0 WAR \u00D7 0.70 = <strong>4.9</strong>. Witt Jr.: 8.0 \u00D7 0.90 = <strong>7.2</strong>. 47% more expected production.</p>' },
+    cpw: { title: "\u{1F4B0} $/WAR \u2014 Cost Per Win",
+      body: '<p><strong>$/WAR</strong> tells you cost per win added. The core Moneyball insight.</p><div class="formula">Market rate: ~$8-10M/WAR<br>Bargain: Under $5M/WAR<br>Overpaying: Over $10M/WAR</div><p>Skenes: $3M / 5.5 WAR = <strong>$0.5M/win</strong>. Verlander: $25M / 1.5 WAR = <strong>$16.7M/win</strong>. 33x difference.</p>' },
+    age: { title: "\u{1F4C8} Age Curve \u2014 Peak Windows",
+      body: '<p>Players peak at ages <strong>25-28</strong> and decline after 30.</p><div class="formula">22-27: WAR +0.3/year (improving)<br>28-29: Stable<br>30-32: WAR -0.5/year<br>33-35: WAR -0.8/year<br>36+: WAR -1.0/year</div><p>The 3-year sparklines on each card visualize this curve.</p>' },
+    risk: { title: "\u26A0\uFE0F Injury Risk \u2014 The Hidden Cost",
+      body: '<p>Injury risk is the probability of missing significant time.</p><div class="formula">Low: 10-15%<br>Moderate: 20-25%<br>High: 30%+<br>Extreme: 45%+</div><p>In the Season Simulation, these percentages become REAL outcomes.</p>' },
+    fan: { title: "\u2B50 Fan Appeal \u2014 Beyond the Numbers",
+      body: '<p><strong>Fan Appeal</strong> captures intangibles: ticket sales, jersey revenue, media attention.</p><div class="formula">\u2B50\u2B50\u2B50\u2B50\u2B50 = Franchise face<br>\u2B50\u2B50\u2B50\u2B50 = Star draw<br>\u2B50\u2B50\u2B50 = Solid name<br>\u2B50\u2B50 = Under the radar</div><p>The "Build the Brand" mandate makes this stat critical.</p>' },
+    efficiency: { title: "\u{1F3C6} Efficiency Score",
+      body: '<p>A weighted composite measuring roster balance. Weights change based on your <strong>Owner Mandate</strong>.</p><div class="formula">Default: WAR(30%) + Value(25%)<br>+ Risk(20%) + Age(15%) + Chemistry(10%)</div><p>Bonuses/penalties from Synergies, Luxury Tax, and Quiz answers also apply. Score <strong>75+</strong> for Green Zone (or 80+ for Championship Window mandate).</p>' }
 };
 
 // ========================================
@@ -1193,42 +1928,192 @@ const INFO = {
 const state = {
     selected: new Set(),
     budget: 200,
-    maxRoster: 9
+    maxRoster: 9,
+    mandate: null,
+    scoutTokens: 8,
+    scouted: {},
+    simResults: null,
+    gamePhase: 'drafting',
+    rivalPicks: [],
+    headlines: [],
+    compareMode: false,
+    compareSlots: [null, null],
+    quizScore: 0,
+    activeSynergies: [],
+    tradeExecuted: false,
+    preSimEfficiency: 0,
+    postSimEfficiency: 0,
+    achievements: JSON.parse(localStorage.getItem('gm_achievements') || '[]')
 };
 
 // ========================================
-// RENDER PLAYER CARDS
+// 3-YEAR PROJECTION
+// ========================================
+function projectWAR(player, yearsForward) {
+    let war = player.war;
+    for (let y = 0; y < yearsForward; y++) {
+        const age = player.age + y;
+        if (age >= 36) war -= 1.0;
+        else if (age >= 33) war -= 0.8;
+        else if (age >= 30) war -= 0.5;
+        else if (age >= 28) war -= 0.0;
+        else war += 0.3;
+    }
+    return Math.max(0.5, parseFloat(war.toFixed(1)));
+}
+
+// ========================================
+// CAP FLEXIBILITY
+// ========================================
+function calculateFlexibility(sel) {
+    if (sel.length === 0) return 0;
+    const totalSalary = sel.reduce((s,p) => s + p.salary, 0);
+    const salaryPct = (totalSalary / state.budget) * 100;
+    const avgYears = sel.reduce((s,p) => s + p.contractYears, 0) / sel.length;
+    let flex = 100 - (avgYears * 8) - (salaryPct * 0.3);
+    // Bonuses for short deals
+    sel.forEach(p => { if (p.contractYears <= 2) flex += 5; });
+    // Penalties for mega deals
+    sel.forEach(p => { if (p.contractYears >= 10) flex -= 10; });
+    return Math.max(0, Math.min(100, Math.round(flex)));
+}
+
+// ========================================
+// LUXURY TAX
+// ========================================
+function calculateLuxuryTax(totalSalary) {
+    const threshold = 160;
+    if (totalSalary <= threshold) return 0;
+    return (totalSalary - threshold) * 0.5;
+}
+
+// ========================================
+// PLAYOFF PROBABILITY
+// ========================================
+function calculatePlayoffOdds(adjWAR) {
+    const expectedWins = 60 + (adjWAR * 2.5);
+    // Logistic curve
+    const k = 0.25;
+    const midpoint = 87;
+    const prob = 1 / (1 + Math.exp(-k * (expectedWins - midpoint)));
+    return { prob: Math.round(prob * 100), wins: Math.round(expectedWins), losses: 162 - Math.round(expectedWins) };
+}
+
+// ========================================
+// SYNERGY CALCULATION
+// ========================================
+function calculateSynergies(sel) {
+    if (sel.length < 2) return [];
+    return SYNERGIES.filter(s => s.test(sel)).map(s => ({ ...s }));
+}
+
+// ========================================
+// RENDER HELPERS
 // ========================================
 function getInitials(name) {
     return name.split(' ').map(w => w[0]).join('');
 }
-
 function getCPWClass(cpw) {
     if (cpw < 4) return 'cpw-green';
     if (cpw <= 8) return 'cpw-yellow';
     return 'cpw-red';
 }
-
 function renderStars(n) {
     let s = '';
-    for (let i = 1; i <= 5; i++) {
-        s += i <= n ? '<span class="star-filled">&#9733;</span>' : '<span class="star-empty">&#9733;</span>';
-    }
+    for (let i = 1; i <= 5; i++) s += i <= n ? '<span class="star-filled">\u2605</span>' : '<span class="star-empty">\u2605</span>';
     return s;
 }
 
+function renderSparkline(player) {
+    const wars = [player.war, projectWAR(player, 1), projectWAR(player, 2)];
+    const max = Math.max(...wars, 1);
+    const colors = wars.map((w, i) => {
+        if (i === 0) return 'var(--accent-blue)';
+        return w >= wars[0] ? 'var(--accent-green)' : w >= wars[0] * 0.8 ? 'var(--accent-amber)' : 'var(--accent-red)';
+    });
+    return `<div class="sparkline-wrap">${wars.map((w, i) =>
+        `<div style="text-align:center"><div class="spark-bar" style="height:${(w/max)*16}px; background:${colors[i]};"></div><div class="spark-label">Y${i+1}</div></div>`
+    ).join('')}</div>`;
+}
+
+// ========================================
+// SCOUTING SYSTEM
+// ========================================
+function isWarScouted(playerId) {
+    return state.scouted[playerId] && state.scouted[playerId].has('war');
+}
+function isRiskScouted(playerId) {
+    return state.scouted[playerId] && state.scouted[playerId].has('risk');
+}
+function isFullyScouted(playerId) {
+    return isWarScouted(playerId) && isRiskScouted(playerId);
+}
+
+function scoutPlayer(playerId, type, event) {
+    if (event) { event.stopPropagation(); event.preventDefault(); }
+    if (state.scoutTokens <= 0) { showToast("No scout tokens remaining!"); return; }
+    if (!state.scouted[playerId]) state.scouted[playerId] = new Set();
+    if (state.scouted[playerId].has(type)) { showToast("Already scouted!"); return; }
+    state.scouted[playerId].add(type);
+    if (type === 'war') state.scouted[playerId].add('scout'); // reveals scout report too
+    state.scoutTokens--;
+    document.getElementById('scoutTokenCount').textContent = state.scoutTokens;
+    renderCards(getCurrentSort());
+    showToast(`\u{1F50D} Intel revealed for ${getPlayer(playerId).name}!`);
+}
+
+function getDisplayWAR(player) {
+    if (isWarScouted(player.id)) return player.war.toFixed(1);
+    return `${player.warRange[0]}-${player.warRange[1]}`;
+}
+function getDisplayRisk(player) {
+    if (isRiskScouted(player.id)) return player.injuryRisk + '%';
+    return player.riskLabel;
+}
+function getDisplayCPW(player) {
+    if (isWarScouted(player.id)) return '$' + (player.salary / player.war).toFixed(1) + 'M/WAR';
+    const midWAR = (player.warRange[0] + player.warRange[1]) / 2;
+    return '~$' + (player.salary / midWAR).toFixed(1) + 'M/WAR';
+}
+function getSortWAR(player) {
+    if (isWarScouted(player.id)) return player.war;
+    return (player.warRange[0] + player.warRange[1]) / 2;
+}
+function getSortCPW(player) {
+    return player.salary / getSortWAR(player);
+}
+
+// ========================================
+// RENDER PLAYER CARDS
+// ========================================
 function renderCards(players) {
     const grid = document.getElementById('playerGrid');
     const totalSalary = getTotalSalary();
+    const effectiveBudget = state.budget;
     grid.innerHTML = players.map(p => {
-        const cpw = (p.salary / p.war).toFixed(1);
         const isSelected = state.selected.has(p.id);
-        const wouldExceed = !isSelected && (totalSalary + p.salary > state.budget);
+        const isRival = state.rivalPicks.includes(p.id);
+        const wouldExceed = !isSelected && (totalSalary + p.salary > effectiveBudget);
         const rosterFull = !isSelected && state.selected.size >= state.maxRoster;
-        const disabled = !isSelected && (wouldExceed || rosterFull);
+        const disabled = !isSelected && !isRival && (wouldExceed || rosterFull);
+        const warScouted = isWarScouted(p.id);
+        const riskScouted = isRiskScouted(p.id);
+        const fullScouted = isFullyScouted(p.id);
+
+        const warDisplay = getDisplayWAR(p);
+        const riskDisplay = getDisplayRisk(p);
+        const cpwDisplay = getDisplayCPW(p);
+        const cpwNum = warScouted ? (p.salary / p.war) : (p.salary / ((p.warRange[0]+p.warRange[1])/2));
+        const warColor = warScouted ? (p.war >= 6 ? 'var(--accent-green)' : p.war >= 4 ? 'var(--accent-blue)' : 'var(--text-primary)') : 'var(--text-secondary)';
+        const riskColor = riskScouted ? (p.injuryRisk >= 30 ? 'var(--accent-red)' : p.injuryRisk >= 20 ? 'var(--accent-amber)' : 'var(--accent-green)') : 'var(--text-secondary)';
+
+        const cardClick = state.compareMode ?
+            `addToCompare(${p.id})` :
+            `togglePlayer(${p.id})`;
+
         return `
-        <div class="player-card tier-${p.tier} ${isSelected ? 'selected' : ''} ${disabled ? 'disabled' : ''}"
-             onclick="togglePlayer(${p.id})" data-id="${p.id}">
+        <div class="player-card tier-${p.tier} ${isSelected ? 'selected' : ''} ${disabled ? 'disabled' : ''} ${isRival ? 'rival-taken' : ''}"
+             onclick="${cardClick}" data-id="${p.id}">
             <div class="card-tier-accent"></div>
             <div class="card-body">
                 <div class="card-top">
@@ -1238,7 +2123,8 @@ function renderCards(players) {
                         <div class="card-meta">
                             <span class="pos-badge">${p.position}</span>
                             <span>Age ${p.age}</span>
-                            <span>${p.contractYears}yr deal</span>
+                            <span>${p.contractYears}yr</span>
+                            ${fullScouted ? '<span class="scouted-badge">SCOUTED</span>' : ''}
                         </div>
                     </div>
                     <div class="card-select-indicator"></div>
@@ -1246,7 +2132,8 @@ function renderCards(players) {
                 <div class="card-stats">
                     <div class="card-stat">
                         <div class="card-stat-label">WAR</div>
-                        <div class="card-stat-value" style="color: ${p.war >= 6 ? 'var(--accent-green)' : p.war >= 4 ? 'var(--accent-blue)' : 'var(--text-primary)'}">${p.war.toFixed(1)}</div>
+                        <div class="card-stat-value ${!warScouted ? 'blurred-stat' : ''}" style="color: ${warColor}; font-size: ${warScouted ? '15px' : '13px'}">${warDisplay}</div>
+                        ${warScouted ? renderSparkline(p) : ''}
                     </div>
                     <div class="card-stat">
                         <div class="card-stat-label">Salary</div>
@@ -1254,53 +2141,61 @@ function renderCards(players) {
                     </div>
                     <div class="card-stat">
                         <div class="card-stat-label">Risk</div>
-                        <div class="card-stat-value" style="color: ${p.injuryRisk >= 30 ? 'var(--accent-red)' : p.injuryRisk >= 20 ? 'var(--accent-amber)' : 'var(--accent-green)'}">${p.injuryRisk}%</div>
+                        <div class="card-stat-value ${!riskScouted ? '' : ''}" style="color: ${riskColor}; font-size: ${riskScouted ? '15px' : '12px'}">${riskDisplay}</div>
                     </div>
                 </div>
                 <div class="card-bottom">
-                    <span class="card-cpw ${getCPWClass(parseFloat(cpw))}">$${cpw}M/WAR</span>
+                    <span class="card-cpw ${getCPWClass(cpwNum)}">${cpwDisplay}</span>
                     <span class="card-stars">${renderStars(p.fanAppeal)}</span>
                 </div>
-                <div class="card-scout">"${p.scout}"</div>
+                ${(warScouted && p.scout) ? `<div class="card-scout">"${p.scout}"</div>` : ''}
+                ${(!fullScouted && state.scoutTokens > 0) ? `
+                <div class="card-actions">
+                    ${!warScouted ? `<button class="scout-btn" onclick="scoutPlayer(${p.id},'war',event)">\u{1F50D} Full Scout</button>` : ''}
+                    ${!riskScouted ? `<button class="scout-btn" onclick="scoutPlayer(${p.id},'risk',event)">\u{1F3E5} Medical</button>` : ''}
+                </div>` : ''}
             </div>
         </div>`;
     }).join('');
 }
 
 // ========================================
-// GAME LOGIC
+// CORE GAME LOGIC
 // ========================================
-function getPlayer(id) {
-    return PLAYERS.find(p => p.id === id);
-}
-
-function getSelectedPlayers() {
-    return PLAYERS.filter(p => state.selected.has(p.id));
-}
-
-function getTotalSalary() {
-    return getSelectedPlayers().reduce((s, p) => s + p.salary, 0);
-}
+function getPlayer(id) { return PLAYERS.find(p => p.id === id); }
+function getSelectedPlayers() { return PLAYERS.filter(p => state.selected.has(p.id)); }
+function getTotalSalary() { return getSelectedPlayers().reduce((s, p) => s + p.salary, 0); }
 
 function togglePlayer(id) {
+    if (state.gamePhase !== 'drafting') return;
+    if (state.rivalPicks.includes(id)) return;
     const player = getPlayer(id);
     if (!player) return;
 
     if (state.selected.has(id)) {
         state.selected.delete(id);
     } else {
-        if (state.selected.size >= state.maxRoster) {
-            showToast("Roster full! Remove a player first.");
-            return;
+        if (state.selected.size >= state.maxRoster) { showToast("Roster full! Remove a player first."); return; }
+        // Check mandate constraints on add
+        if (state.mandate && state.mandate.hardCaps) {
+            if (state.mandate.hardCaps.maxAge && player.age > state.mandate.hardCaps.maxAge) {
+                showToast(`\u{1F6AB} ${state.mandate.name}: No players over age ${state.mandate.hardCaps.maxAge}!`);
+                return;
+            }
         }
         const newTotal = getTotalSalary() + player.salary;
-        if (newTotal > state.budget) {
-            showToast(`Over budget! $${newTotal.toFixed(1)}M exceeds $${state.budget}M cap.`);
-            return;
-        }
+        if (newTotal > state.budget) { showToast(`Over budget! $${newTotal.toFixed(1)}M exceeds $${state.budget}M cap.`); return; }
         state.selected.add(id);
-    }
 
+        // Generate headline
+        generateHeadline(player);
+
+        // Rival GM picks after 3rd, 5th, 7th selection
+        const count = state.selected.size;
+        if (count === 3 || count === 5 || count === 7) {
+            setTimeout(() => rivalGMPick(), 600);
+        }
+    }
     updateEverything();
 }
 
@@ -1308,15 +2203,18 @@ function updateEverything() {
     const metrics = calculateMetrics();
     updateDashboard(metrics);
     renderCards(getCurrentSort());
+    updatePositionMap();
+    updatePlayoffOdds(metrics);
     checkWinCondition(metrics);
 }
 
+// ========================================
+// CALCULATE METRICS
+// ========================================
 function calculateMetrics() {
     const sel = getSelectedPlayers();
     const n = sel.length;
-    if (n === 0) {
-        return { totalWAR: 0, adjWAR: 0, totalSalary: 0, avgCPW: 0, avgAge: 0, avgRisk: 0, avgFan: 0, warScore: 0, valueScore: 0, riskScore: 0, ageScore: 0, chemScore: 0, efficiency: 0 };
-    }
+    if (n === 0) return { totalWAR:0, adjWAR:0, totalSalary:0, avgCPW:0, avgAge:0, avgRisk:0, avgFan:0, warScore:0, valueScore:0, riskScore:0, ageScore:0, chemScore:0, efficiency:0, luxuryTax:0, synergyBonus:0, flexibility:0 };
 
     const totalWAR = sel.reduce((s, p) => s + p.war, 0);
     const adjWAR = sel.reduce((s, p) => s + p.war * (1 - p.injuryRisk / 100), 0);
@@ -1326,23 +2224,28 @@ function calculateMetrics() {
     const avgRisk = sel.reduce((s, p) => s + p.injuryRisk, 0) / n;
     const avgFan = sel.reduce((s, p) => s + p.fanAppeal, 0) / n;
 
-    // WAR Score (30%) — target 40 total WAR
+    // Get weights from mandate or defaults
+    const w = state.mandate ? state.mandate.weightOverrides : { war: 0.30, value: 0.25, risk: 0.20, age: 0.15, chem: 0.10 };
+    const hasFanWeight = w.fan || 0;
+    const chemWeight = w.chem || w.chem === 0 ? w.chem : 0.10;
+
+    // WAR Score
     const warScore = Math.min(100, (totalWAR / 40) * 100);
 
-    // Value Score (25%) — lower $/WAR = better
+    // Value Score
     const valueScore = Math.max(0, Math.min(100, (12 - avgCPW) / 6 * 100));
 
-    // Risk Score (20%) — lower avg risk = better, penalize 3+ high risk players
+    // Risk Score
     const highRiskCount = sel.filter(p => p.injuryRisk >= 30).length;
     let riskScore = Math.max(0, 100 - (avgRisk * 2));
     if (highRiskCount >= 3) riskScore = Math.max(0, riskScore - 20);
 
-    // Age Score (15%) — peak at 26.5
+    // Age Score
     let ageScore = Math.max(0, 100 - (Math.pow(avgAge - 26.5, 2) * 4));
     const youngCount = sel.filter(p => p.age < 26).length;
     if (youngCount >= 2) ageScore = Math.min(100, ageScore + 10);
 
-    // Chemistry Score (10%)
+    // Chemistry Score
     let chemScore = 0;
     const hasSuperstar = sel.some(p => p.fanAppeal === 5);
     if (hasSuperstar) chemScore += 30;
@@ -1354,32 +2257,63 @@ function calculateMetrics() {
     if (oldCount <= 2) chemScore += 30;
     else if (oldCount <= 3) chemScore += 15;
 
-    const efficiency = Math.round(
-        warScore * 0.30 + valueScore * 0.25 + riskScore * 0.20 + ageScore * 0.15 + chemScore * 0.10
-    );
+    // Fan Score (for Brand mandate)
+    let fanScore = 0;
+    if (hasFanWeight > 0) {
+        fanScore = Math.min(100, (avgFan / 4) * 100);
+    }
 
-    return { totalWAR, adjWAR, totalSalary, avgCPW, avgAge, avgRisk, avgFan, warScore, valueScore, riskScore, ageScore, chemScore, efficiency };
+    // Base efficiency
+    let efficiency = warScore * (w.war || 0.30) + valueScore * (w.value || 0.25) + riskScore * (w.risk || 0.20) + ageScore * (w.age || 0.15) + chemScore * chemWeight;
+    if (hasFanWeight > 0) efficiency += fanScore * hasFanWeight;
+
+    // Luxury tax penalty
+    const luxuryTax = calculateLuxuryTax(totalSalary);
+    efficiency -= luxuryTax;
+
+    // Synergies
+    const synergies = calculateSynergies(sel);
+    state.activeSynergies = synergies;
+    const synergyBonus = synergies.reduce((s, syn) => s + syn.bonus, 0);
+    efficiency += synergyBonus;
+
+    // Mandate hard caps
+    if (state.mandate && state.mandate.hardCaps) {
+        const hc = state.mandate.hardCaps;
+        if (hc.minWAR && totalWAR < hc.minWAR) efficiency = Math.min(efficiency, hc.capAt || 60);
+        if (hc.minFanStars) {
+            const highFan = sel.filter(p => p.fanAppeal >= 4).length;
+            if (highFan < hc.minFanStars && n === 9) efficiency = Math.min(efficiency, 60);
+        }
+        if (hc.maxAvgRisk && avgRisk > hc.maxAvgRisk && n === 9) efficiency = Math.min(efficiency, 60);
+        if (hc.minElite) {
+            const eliteCount = sel.filter(p => p.tier === 'elite').length;
+            if (eliteCount < hc.minElite && n === 9) efficiency = Math.min(efficiency, 60);
+        }
+    }
+
+    efficiency = Math.max(0, Math.min(100, Math.round(efficiency)));
+    const flexibility = calculateFlexibility(sel);
+
+    return { totalWAR, adjWAR, totalSalary, avgCPW, avgAge, avgRisk, avgFan, warScore, valueScore, riskScore, ageScore, chemScore, fanScore, efficiency, luxuryTax, synergyBonus, flexibility };
 }
 
+// ========================================
+// UPDATE DASHBOARD
+// ========================================
 function updateDashboard(m) {
     const n = state.selected.size;
-
     // Budget
     const pct = (m.totalSalary / state.budget) * 100;
     const budgetBar = document.getElementById('budgetBar');
     const budgetText = document.getElementById('budgetText');
     budgetBar.style.width = Math.min(pct, 100) + '%';
-    if (pct > 95) {
-        budgetBar.style.background = 'var(--accent-red)';
-        budgetText.style.color = 'var(--accent-red)';
-    } else if (pct > 75) {
-        budgetBar.style.background = 'var(--accent-amber)';
-        budgetText.style.color = 'var(--accent-amber)';
-    } else {
-        budgetBar.style.background = 'var(--accent-green)';
-        budgetText.style.color = 'var(--accent-green)';
-    }
-    budgetText.textContent = `$${m.totalSalary.toFixed(1)}M / $${state.budget}M`;
+    if (pct > 95) { budgetBar.style.background = 'var(--accent-red)'; budgetText.style.color = 'var(--accent-red)'; }
+    else if (pct > 80) { budgetBar.style.background = 'var(--accent-amber)'; budgetText.style.color = 'var(--accent-amber)'; }
+    else { budgetBar.style.background = 'var(--accent-green)'; budgetText.style.color = 'var(--accent-green)'; }
+    let budgetStr = `$${m.totalSalary.toFixed(1)}M / $${state.budget}M`;
+    if (m.luxuryTax > 0) budgetStr += ` <span class="tax-penalty-text">(Tax: -${m.luxuryTax.toFixed(1)} pts)</span>`;
+    budgetText.innerHTML = budgetStr;
 
     // Roster count
     document.getElementById('rosterCount').textContent = n;
@@ -1394,7 +2328,8 @@ function updateDashboard(m) {
         else if (m.efficiency < 75) { mood.textContent = '\u{1F60A}'; mood.dataset.tip = 'Owner is hopeful'; }
         else { mood.textContent = '\u{1F60E}'; mood.dataset.tip = 'Owner is impressed!'; }
     } else {
-        if (m.efficiency >= 75) { mood.textContent = '\u{1F929}'; mood.dataset.tip = 'Owner is ECSTATIC!'; }
+        const gz = state.mandate ? state.mandate.greenZone : 75;
+        if (m.efficiency >= gz) { mood.textContent = '\u{1F929}'; mood.dataset.tip = 'Owner is ECSTATIC!'; }
         else if (m.efficiency >= 60) { mood.textContent = '\u{1F60A}'; mood.dataset.tip = 'Owner sees potential'; }
         else { mood.textContent = '\u{1F612}'; mood.dataset.tip = 'Owner wants a meeting...'; }
     }
@@ -1404,46 +2339,43 @@ function updateDashboard(m) {
     animateValue('statAdjWAR', m.adjWAR, 1);
 
     const cpwEl = document.getElementById('statCPW');
-    if (n > 0) {
-        cpwEl.textContent = '$' + m.avgCPW.toFixed(1) + 'M';
-        cpwEl.style.color = m.avgCPW < 5 ? 'var(--accent-green)' : m.avgCPW <= 8 ? 'var(--accent-amber)' : 'var(--accent-red)';
-    } else {
-        cpwEl.textContent = '\u2014';
-        cpwEl.style.color = 'var(--text-primary)';
-    }
+    if (n > 0) { cpwEl.textContent = '$' + m.avgCPW.toFixed(1) + 'M'; cpwEl.style.color = m.avgCPW < 5 ? 'var(--accent-green)' : m.avgCPW <= 8 ? 'var(--accent-amber)' : 'var(--accent-red)'; }
+    else { cpwEl.textContent = '\u2014'; cpwEl.style.color = 'var(--text-primary)'; }
 
     const ageEl = document.getElementById('statAge');
-    if (n > 0) {
-        ageEl.textContent = m.avgAge.toFixed(1);
-        ageEl.style.color = m.avgAge <= 28 ? 'var(--accent-green)' : m.avgAge <= 31 ? 'var(--accent-amber)' : 'var(--accent-red)';
-    } else {
-        ageEl.textContent = '\u2014';
-        ageEl.style.color = 'var(--text-primary)';
-    }
+    if (n > 0) { ageEl.textContent = m.avgAge.toFixed(1); ageEl.style.color = m.avgAge <= 28 ? 'var(--accent-green)' : m.avgAge <= 31 ? 'var(--accent-amber)' : 'var(--accent-red)'; }
+    else { ageEl.textContent = '\u2014'; ageEl.style.color = 'var(--text-primary)'; }
 
     const riskEl = document.getElementById('statRisk');
-    if (n > 0) {
-        riskEl.textContent = m.avgRisk.toFixed(0) + '%';
-        riskEl.style.color = m.avgRisk < 15 ? 'var(--accent-green)' : m.avgRisk <= 25 ? 'var(--accent-amber)' : 'var(--accent-red)';
-    } else {
-        riskEl.textContent = '\u2014';
-        riskEl.style.color = 'var(--text-primary)';
-    }
+    if (n > 0) { riskEl.textContent = m.avgRisk.toFixed(0) + '%'; riskEl.style.color = m.avgRisk < 15 ? 'var(--accent-green)' : m.avgRisk <= 25 ? 'var(--accent-amber)' : 'var(--accent-red)'; }
+    else { riskEl.textContent = '\u2014'; riskEl.style.color = 'var(--text-primary)'; }
 
     const fanEl = document.getElementById('statFan');
-    if (n > 0) {
-        fanEl.textContent = m.avgFan.toFixed(1) + ' \u2605';
-        fanEl.style.color = m.avgFan >= 3.5 ? 'var(--accent-gold)' : 'var(--text-primary)';
-    } else {
-        fanEl.textContent = '\u2014';
-        fanEl.style.color = 'var(--text-primary)';
-    }
+    if (n > 0) { fanEl.textContent = m.avgFan.toFixed(1) + ' \u2605'; fanEl.style.color = m.avgFan >= 3.5 ? 'var(--accent-gold)' : 'var(--text-primary)'; }
+    else { fanEl.textContent = '\u2014'; fanEl.style.color = 'var(--text-primary)'; }
 
-    // WAR color
-    const warEl = document.getElementById('statWAR');
-    warEl.style.color = m.totalWAR >= 40 ? 'var(--accent-green)' : m.totalWAR >= 30 ? 'var(--accent-amber)' : 'var(--text-primary)';
-    const adjEl = document.getElementById('statAdjWAR');
-    adjEl.style.color = m.adjWAR >= 35 ? 'var(--accent-green)' : m.adjWAR >= 25 ? 'var(--accent-amber)' : 'var(--text-primary)';
+    // 3Y $/WAR
+    const threeyEl = document.getElementById('stat3YCPW');
+    if (n > 0) {
+        const sel = getSelectedPlayers();
+        let totalSal3 = sel.reduce((s,p) => s + p.salary * 3, 0);
+        let totalWar3 = sel.reduce((s,p) => s + p.war + projectWAR(p,1) + projectWAR(p,2), 0);
+        const threeCPW = totalSal3 / totalWar3;
+        threeyEl.textContent = '$' + threeCPW.toFixed(1) + 'M';
+        threeyEl.style.color = threeCPW < 5 ? 'var(--accent-green)' : threeCPW <= 8 ? 'var(--accent-amber)' : 'var(--accent-red)';
+    } else { threeyEl.textContent = '\u2014'; threeyEl.style.color = 'var(--text-primary)'; }
+
+    // Cap Flexibility
+    const flexEl = document.getElementById('statFlex');
+    if (n > 0) {
+        const flex = m.flexibility;
+        flexEl.textContent = flex;
+        flexEl.style.color = flex > 60 ? 'var(--accent-green)' : flex > 30 ? 'var(--accent-amber)' : 'var(--accent-red)';
+    } else { flexEl.textContent = '\u2014'; flexEl.style.color = 'var(--text-primary)'; }
+
+    // WAR colors
+    document.getElementById('statWAR').style.color = m.totalWAR >= 40 ? 'var(--accent-green)' : m.totalWAR >= 30 ? 'var(--accent-amber)' : 'var(--text-primary)';
+    document.getElementById('statAdjWAR').style.color = m.adjWAR >= 35 ? 'var(--accent-green)' : m.adjWAR >= 25 ? 'var(--accent-amber)' : 'var(--text-primary)';
 
     // Efficiency bar
     const effBar = document.getElementById('effBar');
@@ -1451,27 +2383,65 @@ function updateDashboard(m) {
     const eff = n > 0 ? m.efficiency : 0;
     effBar.style.width = eff + '%';
     effScore.textContent = eff;
-    if (eff >= 75) {
-        effBar.style.background = 'var(--accent-green)';
-        effScore.style.color = 'var(--accent-green)';
-    } else if (eff >= 60) {
-        effBar.style.background = 'var(--accent-amber)';
-        effScore.style.color = 'var(--accent-amber)';
-    } else if (n > 0) {
-        effBar.style.background = 'var(--accent-red)';
-        effScore.style.color = 'var(--accent-red)';
-    } else {
-        effBar.style.background = 'var(--text-dim)';
-        effScore.style.color = 'var(--text-dim)';
-    }
+    if (eff >= 75) { effBar.style.background = 'var(--accent-green)'; effScore.style.color = 'var(--accent-green)'; }
+    else if (eff >= 60) { effBar.style.background = 'var(--accent-amber)'; effScore.style.color = 'var(--accent-amber)'; }
+    else if (n > 0) { effBar.style.background = 'var(--accent-red)'; effScore.style.color = 'var(--accent-red)'; }
+    else { effBar.style.background = 'var(--text-dim)'; effScore.style.color = 'var(--text-dim)'; }
 
-    // Pulse animation
     effScore.classList.remove('pulse');
     void effScore.offsetWidth;
     effScore.classList.add('pulse');
+
+    // Synergy badges
+    const synergyBar = document.getElementById('synergyBar');
+    synergyBar.innerHTML = state.activeSynergies.map(s =>
+        `<div class="synergy-badge ${s.bonus > 0 ? 'bonus' : 'penalty'}" data-tip="${s.flavor}">
+            ${s.emoji} ${s.name} (${s.bonus > 0 ? '+' : ''}${s.bonus})
+        </div>`
+    ).join('');
 }
 
-// Simple value animation
+function updatePositionMap() {
+    const sel = getSelectedPlayers();
+    const { filled, needs } = getPositionFill(sel);
+    const map = document.getElementById('positionMap');
+    let html = '<span style="font-size:10px;color:var(--text-dim);margin-right:4px;">POSITIONS:</span>';
+    for (const [pos, need] of Object.entries(needs)) {
+        const have = filled[pos] || 0;
+        for (let i = 0; i < need; i++) {
+            html += `<div class="pos-slot ${i < have ? 'filled' : 'empty'}">${pos} ${i < have ? '\u2713' : '?'}</div>`;
+        }
+    }
+    // Flex slots
+    const totalRequired = Object.values(needs).reduce((a,b)=>a+b,0);
+    const flexFilled = Math.max(0, sel.length - totalRequired);
+    for (let i = 0; i < 2; i++) {
+        html += `<div class="pos-slot ${i < flexFilled ? 'filled' : ''}">${i < flexFilled ? 'FLEX \u2713' : 'FLEX'}</div>`;
+    }
+    map.innerHTML = html;
+}
+
+function updatePlayoffOdds(m) {
+    const n = state.selected.size;
+    const ring = document.getElementById('playoffRing');
+    const pctEl = document.getElementById('playoffPct');
+    const textEl = document.getElementById('playoffText');
+    if (n === 0) {
+        ring.style.background = `conic-gradient(var(--text-dim) 0%, transparent 0%)`;
+        pctEl.textContent = '0%';
+        pctEl.style.color = 'var(--text-dim)';
+        textEl.innerHTML = 'Add players to see playoff projections.';
+        return;
+    }
+    const odds = calculatePlayoffOdds(m.adjWAR);
+    const color = odds.prob < 20 ? 'var(--accent-red)' : odds.prob < 50 ? 'var(--accent-amber)' : 'var(--accent-green)';
+    ring.style.background = `conic-gradient(${color} ${odds.prob * 3.6}deg, rgba(255,255,255,0.06) 0deg)`;
+    pctEl.textContent = odds.prob + '%';
+    pctEl.style.color = color;
+    let desc = odds.wins >= 95 ? "Division favorite." : odds.wins >= 88 ? "Wild Card contender." : odds.wins >= 82 ? "In the hunt." : "Below .500 projection.";
+    textEl.innerHTML = `Projected: <strong>${odds.wins}-${odds.losses}</strong>. ${desc}`;
+}
+
 function animateValue(elId, target, decimals) {
     const el = document.getElementById(elId);
     const current = parseFloat(el.textContent) || 0;
@@ -1480,74 +2450,550 @@ function animateValue(elId, target, decimals) {
     let step = 0;
     const interval = setInterval(() => {
         step++;
-        const val = current + diff * (step / steps);
-        el.textContent = val.toFixed(decimals);
-        if (step >= steps) {
-            el.textContent = target.toFixed(decimals);
-            clearInterval(interval);
-        }
+        el.textContent = (current + diff * (step / steps)).toFixed(decimals);
+        if (step >= steps) { el.textContent = target.toFixed(decimals); clearInterval(interval); }
     }, 20);
 }
 
 // ========================================
-// WIN CONDITION
+// RIVAL GM
+// ========================================
+function rivalGMPick() {
+    const available = PLAYERS.filter(p => !state.selected.has(p.id) && !state.rivalPicks.includes(p.id));
+    if (available.length === 0) return;
+    // AI: 60% $/WAR efficiency + 40% raw WAR
+    available.sort((a, b) => {
+        const aScore = (1 / (a.salary / a.war)) * 0.6 + a.war * 0.4;
+        const bScore = (1 / (b.salary / b.war)) * 0.6 + b.war * 0.4;
+        return bScore - aScore;
+    });
+    const pick = available[0];
+    state.rivalPicks.push(pick.id);
+
+    // Show banner
+    const banner = document.getElementById('rivalBanner');
+    document.getElementById('rivalBannerText').textContent =
+        `The Metro Stars have signed ${pick.name} to a ${pick.contractYears}-year, $${(pick.salary * pick.contractYears).toFixed(0)}M deal!`;
+    banner.classList.add('show');
+    setTimeout(() => banner.classList.remove('show'), 3500);
+
+    renderCards(getCurrentSort());
+}
+
+// ========================================
+// MEDIA HEADLINES
+// ========================================
+function generateHeadline(player) {
+    const sel = getSelectedPlayers();
+    let templates;
+    // Check streaks
+    const gemCount = sel.filter(p => p.tier === 'gem' || p.tier === 'value').length;
+    const totalSalary = getTotalSalary();
+    const avgAge = sel.reduce((s,p)=>s+p.age,0) / sel.length;
+
+    if (gemCount >= 3 && (player.tier === 'gem' || player.tier === 'value')) {
+        templates = HEADLINES.cheap_streak;
+    } else if (totalSalary > 150) {
+        templates = HEADLINES.big_spender;
+    } else if (avgAge < 25 && sel.length >= 3) {
+        templates = HEADLINES.young_roster;
+    } else if (player.tier === 'elite') {
+        templates = HEADLINES.elite_sign;
+    } else if (player.tier === 'trap') {
+        templates = HEADLINES.trap_sign;
+    } else if (player.tier === 'gem') {
+        if (player.war >= 5 && player.salary <= 5) {
+            templates = HEADLINES.smart_money;
+        } else {
+            templates = HEADLINES.gem_sign;
+        }
+    } else {
+        templates = HEADLINES.value_sign;
+    }
+
+    const template = templates[Math.floor(Math.random() * templates.length)];
+    const headline = template.replace('{name}', player.name);
+    state.headlines.push(headline);
+
+    // Show ticker
+    const ticker = document.getElementById('mediaTicker');
+    const tickerText = document.getElementById('tickerText');
+    ticker.classList.add('active');
+    tickerText.textContent = headline;
+}
+
+// ========================================
+// COMPARE MODE
+// ========================================
+function toggleCompareMode() {
+    state.compareMode = !state.compareMode;
+    state.compareSlots = [null, null];
+    document.getElementById('compareToggle').classList.toggle('active', state.compareMode);
+    if (state.compareMode) showToast("Compare mode ON. Click two players to compare.");
+    else showToast("Compare mode OFF.");
+}
+
+function addToCompare(id) {
+    if (!state.compareMode) return;
+    if (state.compareSlots[0] === null) {
+        state.compareSlots[0] = id;
+        showToast(`Selected ${getPlayer(id).name}. Now pick a second player.`);
+    } else if (state.compareSlots[1] === null && state.compareSlots[0] !== id) {
+        state.compareSlots[1] = id;
+        showCompareModal(state.compareSlots[0], state.compareSlots[1]);
+        state.compareSlots = [null, null];
+    }
+}
+
+function showCompareModal(id1, id2) {
+    const p1 = getPlayer(id1), p2 = getPlayer(id2);
+    const cpw1 = p1.salary / p1.war, cpw2 = p2.salary / p2.war;
+    const dur1 = 100 - p1.injuryRisk, dur2 = 100 - p2.injuryRisk;
+    const youth1 = 100 - p1.age, youth2 = 100 - p2.age;
+
+    function winner(a, b) { return a >= b ? 'cr-winner' : 'cr-loser'; }
+    function winnerInv(a, b) { return a <= b ? 'cr-winner' : 'cr-loser'; }
+
+    const pctProd = p1.war > 0 ? Math.round((Math.min(p1.war, p2.war) / Math.max(p1.war, p2.war)) * 100) : 0;
+    const pctCost = cpw1 > 0 ? Math.round((Math.min(cpw1, cpw2) / Math.max(cpw1, cpw2)) * 100) : 0;
+    const cheaper = cpw1 < cpw2 ? p1 : p2;
+    const expensive = cpw1 < cpw2 ? p2 : p1;
+
+    const content = `
+        <h2>\u{1F4CA} Player Comparison</h2>
+        <div class="compare-grid">
+            <div class="compare-name">${p1.name}</div>
+            <div class="compare-vs">VS</div>
+            <div class="compare-name">${p2.name}</div>
+        </div>
+        <div class="compare-row"><span class="${winner(p1.war, p2.war)}">${p1.war} WAR</span><span class="cr-label">WAR</span><span class="${winner(p2.war, p1.war)}">${p2.war} WAR</span></div>
+        <div class="compare-row"><span class="${winnerInv(cpw1, cpw2)}">$${cpw1.toFixed(1)}M</span><span class="cr-label">$/WAR</span><span class="${winnerInv(cpw2, cpw1)}">$${cpw2.toFixed(1)}M</span></div>
+        <div class="compare-row"><span class="${winnerInv(p1.injuryRisk, p2.injuryRisk)}">${p1.injuryRisk}%</span><span class="cr-label">Risk</span><span class="${winnerInv(p2.injuryRisk, p1.injuryRisk)}">${p2.injuryRisk}%</span></div>
+        <div class="compare-row"><span class="${winnerInv(p1.age, p2.age)}">${p1.age}</span><span class="cr-label">Age</span><span class="${winnerInv(p2.age, p1.age)}">${p2.age}</span></div>
+        <div class="compare-row"><span class="${winner(p1.fanAppeal, p2.fanAppeal)}">${p1.fanAppeal}\u2605</span><span class="cr-label">Appeal</span><span class="${winner(p2.fanAppeal, p1.fanAppeal)}">${p2.fanAppeal}\u2605</span></div>
+        <div class="compare-row"><span>${projectWAR(p1,1)}/${projectWAR(p1,2)}</span><span class="cr-label">Y2/Y3 WAR</span><span>${projectWAR(p2,1)}/${projectWAR(p2,2)}</span></div>
+        <div class="analyst-take">
+            <strong>Analyst Take:</strong> ${cheaper.name} gives you ${pctProd}% of ${expensive.name}'s production at ${100-pctCost}% less cost per WAR. ${cpw1 < cpw2 ? p1.name : p2.name} is the better value pick.
+        </div>
+    `;
+    document.getElementById('compareContent').innerHTML = content;
+    document.getElementById('compareModal').classList.add('active');
+}
+function closeCompare() { document.getElementById('compareModal').classList.remove('active'); }
+
+// ========================================
+// WIN CONDITION & SIMULATION PIPELINE
 // ========================================
 let hasShownResult = false;
 
 function checkWinCondition(m) {
     if (state.selected.size === 9 && !hasShownResult) {
+        // Check position requirements
+        const sel = getSelectedPlayers();
+        if (!positionsMet(sel)) {
+            const missing = getMissingPositions(sel);
+            showToast(`\u{26A0}\u{FE0F} Missing positions: ${missing.join(', ')}`);
+            return;
+        }
         hasShownResult = true;
-        setTimeout(() => showResult(m), 400);
+        state.preSimEfficiency = m.efficiency;
+        setTimeout(() => startSimulation(m), 500);
     }
 }
 
-function showResult(m) {
-    const isGreen = m.efficiency >= 75;
-    const isYellow = m.efficiency >= 60;
+// ========================================
+// SEASON SIMULATION
+// ========================================
+function startSimulation(preSimMetrics) {
+    state.gamePhase = 'simulating';
+    const sel = getSelectedPlayers();
+    state.simResults = {};
 
+    // Roll outcomes
+    sel.forEach(p => {
+        const isScouted = isFullyScouted(p.id);
+        const riskMod = isScouted ? 1.0 : 1.3; // unscouted = wider variance
+        const effectiveRisk = Math.min(80, p.injuryRisk * riskMod);
+        const roll = Math.random() * 100;
+
+        if (roll < effectiveRisk) {
+            // Injury
+            const factor = 0.3 + Math.random() * 0.2;
+            state.simResults[p.id] = { type: 'injury', actualWAR: parseFloat((p.war * factor).toFixed(1)), headline: p.injuryHeadline };
+        } else if (p.age <= 26 && p.injuryRisk <= 15 && Math.random() < 0.25) {
+            // Breakout
+            state.simResults[p.id] = { type: 'breakout', actualWAR: parseFloat((p.war + 1.0).toFixed(1)), headline: p.breakoutHeadline };
+        } else {
+            // Steady
+            state.simResults[p.id] = { type: 'steady', actualWAR: p.war, headline: `Steady as expected \u2014 ${p.name} delivering projected production.` };
+        }
+    });
+
+    // Show simulation modal
+    const simContent = document.getElementById('simContent');
+    simContent.innerHTML = `
+        <div style="font-size:36px; margin-bottom:8px;">\u{1F3DF}\u{FE0F}</div>
+        <h2 style="justify-content:center;">Season Simulation</h2>
+        <p style="text-align:center; color: var(--text-secondary);">Let's see how your roster holds up over a 162-game season...</p>
+        <div class="sim-phase" id="simPhase">Spring Training</div>
+        <div class="sim-ticker" id="simTicker"></div>
+        <div style="text-align:center; margin-top:12px;">
+            <button class="try-again-btn" id="simContinueBtn" style="display:none;" onclick="onSimContinue()">Continue</button>
+        </div>
+    `;
+    document.getElementById('simModal').classList.add('active');
+
+    // Animate events
+    const events = sel.map(p => state.simResults[p.id]);
+    const phases = ['Spring Training', 'Midseason', 'September Stretch'];
+    let eventIndex = 0;
+    const eventsPerPhase = Math.ceil(sel.length / 3);
+
+    function showNextEvent() {
+        if (eventIndex >= sel.length) {
+            // Check if we should show trade deadline after first phase
+            document.getElementById('simContinueBtn').style.display = 'inline-block';
+            document.getElementById('simContinueBtn').textContent = 'See Results';
+            return;
+        }
+        const phaseIdx = Math.min(2, Math.floor(eventIndex / eventsPerPhase));
+        document.getElementById('simPhase').textContent = phases[phaseIdx];
+
+        const p = sel[eventIndex];
+        const result = state.simResults[p.id];
+        const ticker = document.getElementById('simTicker');
+        const div = document.createElement('div');
+        div.className = 'sim-event ' + result.type;
+        div.textContent = result.headline;
+        ticker.appendChild(div);
+        ticker.scrollTop = ticker.scrollHeight;
+
+        eventIndex++;
+
+        // After first third, offer trade deadline
+        if (eventIndex === eventsPerPhase && !state.tradeExecuted) {
+            setTimeout(() => {
+                document.getElementById('simContinueBtn').style.display = 'inline-block';
+                document.getElementById('simContinueBtn').textContent = '\u{1F4E2} Trade Deadline';
+                document.getElementById('simContinueBtn').onclick = () => showTradeDeadline(sel, eventIndex, eventsPerPhase, phases);
+            }, 500);
+            return;
+        }
+
+        setTimeout(showNextEvent, 500);
+    }
+
+    setTimeout(showNextEvent, 800);
+}
+
+function onSimContinue() {
+    document.getElementById('simModal').classList.remove('active');
+    startQuiz();
+}
+
+// ========================================
+// TRADE DEADLINE
+// ========================================
+function showTradeDeadline(sel, eventIndex, eventsPerPhase, phases) {
+    document.getElementById('simModal').classList.remove('active');
+    state.gamePhase = 'trading';
+
+    const available = PLAYERS.filter(p => !state.selected.has(p.id) && !state.rivalPicks.includes(p.id));
+    const tradeContent = document.getElementById('tradeContent');
+
+    let rosterHTML = sel.map(p => {
+        const sr = state.simResults[p.id];
+        const warStr = sr ? `${sr.actualWAR} WAR${sr.type === 'injury' ? ' (HURT)' : sr.type === 'breakout' ? ' (HOT)' : ''}` : `${p.war} WAR`;
+        const cls = sr && sr.type === 'injury' ? 'style="border-color: var(--accent-red);"' : '';
+        return `<div class="trade-player-item" ${cls} onclick="selectTradeDrop(${p.id})" id="tradeDrop${p.id}">
+            <div class="tp-name">${p.name}</div>
+            <div class="tp-stats">${p.position} | ${warStr} | $${p.salary}M</div>
+        </div>`;
+    }).join('');
+
+    let availHTML = available.slice(0, 8).map(p =>
+        `<div class="trade-player-item" onclick="selectTradeAdd(${p.id})" id="tradeAdd${p.id}">
+            <div class="tp-name">${p.name}</div>
+            <div class="tp-stats">${p.position} | ${p.war} WAR | $${p.salary}M</div>
+        </div>`
+    ).join('');
+
+    tradeContent.innerHTML = `
+        <div style="text-align:center; margin-bottom:12px;">
+            <div style="font-size:28px;">\u{1F4E2}</div>
+            <h2 style="justify-content:center;">Trade Deadline \u2014 July 31st</h2>
+            <p>You've seen how your roster is performing. Want to make a move? Swap 1 player for a $5M trade fee.</p>
+        </div>
+        <div class="trade-grid">
+            <div class="trade-column"><h3>Your Roster (Drop 1)</h3>${rosterHTML}</div>
+            <div class="trade-column"><h3>Available (Add 1)</h3>${availHTML}</div>
+        </div>
+        <div class="trade-fee" id="tradeFeeText">Trade fee: $5M added to salary</div>
+        <div style="text-align:center; display:flex; gap:8px; justify-content:center;">
+            <button class="trade-btn" id="executeTrade" disabled onclick="executeTrade()">Execute Trade</button>
+            <button class="standpat-btn" onclick="standPat()">Stand Pat</button>
+        </div>
+    `;
+    document.getElementById('tradeModal').classList.add('active');
+    state._tradeDrop = null;
+    state._tradeAdd = null;
+    state._tradeEventIndex = eventIndex;
+    state._tradeEventsPerPhase = eventsPerPhase;
+    state._tradePhases = phases;
+}
+
+function selectTradeDrop(id) {
+    document.querySelectorAll('#tradeContent .trade-column:first-child .trade-player-item').forEach(el => el.classList.remove('trade-selected'));
+    document.getElementById('tradeDrop' + id).classList.add('trade-selected');
+    state._tradeDrop = id;
+    checkTradeReady();
+}
+function selectTradeAdd(id) {
+    document.querySelectorAll('#tradeContent .trade-column:last-child .trade-player-item').forEach(el => el.classList.remove('trade-selected'));
+    document.getElementById('tradeAdd' + id).classList.add('trade-selected');
+    state._tradeAdd = id;
+    checkTradeReady();
+}
+function checkTradeReady() {
+    const btn = document.getElementById('executeTrade');
+    if (state._tradeDrop && state._tradeAdd) {
+        const dropPlayer = getPlayer(state._tradeDrop);
+        const addPlayer = getPlayer(state._tradeAdd);
+        const newSalary = getTotalSalary() - dropPlayer.salary + addPlayer.salary + 5;
+        if (newSalary > state.budget) {
+            btn.disabled = true;
+            document.getElementById('tradeFeeText').textContent = `Trade fee: $5M. New total: $${newSalary.toFixed(1)}M \u2014 OVER CAP!`;
+        } else {
+            btn.disabled = false;
+            document.getElementById('tradeFeeText').textContent = `Trade fee: $5M. New salary total: $${newSalary.toFixed(1)}M`;
+        }
+    }
+}
+
+function executeTrade() {
+    state.selected.delete(state._tradeDrop);
+    state.selected.add(state._tradeAdd);
+    state.tradeExecuted = true;
+    // Add trade fee as phantom salary adjustment (add $5M via a flag)
+    state._tradeFee = 5;
+    // Simulate the new player
+    const addP = getPlayer(state._tradeAdd);
+    state.simResults[addP.id] = { type: 'steady', actualWAR: addP.war, headline: `Trade acquisition ${addP.name} provides a spark off the bench.` };
+    showToast(`\u{1F504} Traded for ${addP.name}!`);
+    document.getElementById('tradeModal').classList.remove('active');
+    resumeSimulation();
+}
+
+function standPat() {
+    document.getElementById('tradeModal').classList.remove('active');
+    resumeSimulation();
+}
+
+function resumeSimulation() {
+    state.gamePhase = 'simulating';
+    document.getElementById('simModal').classList.add('active');
+    const sel = getSelectedPlayers();
+    let idx = state._tradeEventIndex;
+    const phases = state._tradePhases;
+    const epp = state._tradeEventsPerPhase;
+
+    function showNext() {
+        if (idx >= sel.length) {
+            document.getElementById('simContinueBtn').style.display = 'inline-block';
+            document.getElementById('simContinueBtn').textContent = 'See Results';
+            document.getElementById('simContinueBtn').onclick = onSimContinue;
+            return;
+        }
+        const phaseIdx = Math.min(2, Math.floor(idx / epp));
+        document.getElementById('simPhase').textContent = phases[phaseIdx];
+        const p = sel[idx];
+        if (state.simResults[p.id]) {
+            const result = state.simResults[p.id];
+            const ticker = document.getElementById('simTicker');
+            const div = document.createElement('div');
+            div.className = 'sim-event ' + result.type;
+            div.textContent = result.headline;
+            ticker.appendChild(div);
+            ticker.scrollTop = ticker.scrollHeight;
+        }
+        idx++;
+        setTimeout(showNext, 500);
+    }
+    setTimeout(showNext, 400);
+}
+
+// ========================================
+// GM KNOWLEDGE QUIZ
+// ========================================
+function startQuiz() {
+    state.gamePhase = 'quiz';
+    state.quizScore = 0;
+    // Pick 3 random questions
+    const shuffled = [...QUIZ_POOL].sort(() => Math.random() - 0.5);
+    state._quizQuestions = shuffled.slice(0, 3);
+    state._quizIndex = 0;
+    showQuizQuestion();
+}
+
+function showQuizQuestion() {
+    const qi = state._quizIndex;
+    if (qi >= 3) {
+        // Quiz done, show results
+        document.getElementById('quizModal').classList.remove('active');
+        showFinalResult();
+        return;
+    }
+    const q = state._quizQuestions[qi];
+    const quizContent = document.getElementById('quizContent');
+    quizContent.innerHTML = `
+        <div style="text-align:center; margin-bottom:8px; font-size:28px;">\u{1F9E0}</div>
+        <h2>GM Knowledge Check</h2>
+        <div class="quiz-progress">Question ${qi + 1} of 3 | Score: ${state.quizScore}/3</div>
+        <div class="quiz-question">${q.question}</div>
+        ${q.options.map((opt, i) =>
+            `<button class="quiz-option" onclick="answerQuiz(${i})" id="quizOpt${i}">${opt}</button>`
+        ).join('')}
+        <div id="quizFeedback"></div>
+    `;
+    document.getElementById('quizModal').classList.add('active');
+}
+
+function answerQuiz(idx) {
+    const q = state._quizQuestions[state._quizIndex];
+    const correct = idx === q.correctIndex;
+    if (correct) state.quizScore++;
+
+    // Disable all options
+    document.querySelectorAll('.quiz-option').forEach((btn, i) => {
+        btn.disabled = true;
+        if (i === q.correctIndex) btn.classList.add('correct');
+        if (i === idx && !correct) btn.classList.add('wrong');
+    });
+
+    document.getElementById('quizFeedback').innerHTML = `
+        <div class="quiz-explanation">${correct ? '\u2705 Correct!' : '\u274C Incorrect.'} ${q.explanation}</div>
+        <button class="quiz-next-btn" onclick="nextQuizQuestion()">${state._quizIndex < 2 ? 'Next Question' : 'See Final Results'}</button>
+    `;
+}
+
+function nextQuizQuestion() {
+    state._quizIndex++;
+    showQuizQuestion();
+}
+
+// ========================================
+// FINAL RESULTS
+// ========================================
+function showFinalResult() {
+    state.gamePhase = 'results';
+    const sel = getSelectedPlayers();
+    const tradeFee = state._tradeFee || 0;
+
+    // Calculate post-sim metrics
+    const simWAR = sel.reduce((s, p) => {
+        const sr = state.simResults[p.id];
+        return s + (sr ? sr.actualWAR : p.war);
+    }, 0);
+    const simSalary = sel.reduce((s, p) => s + p.salary, 0) + tradeFee;
+    const simRisk = sel.reduce((s, p) => s + p.injuryRisk, 0) / sel.length;
+    const simAge = sel.reduce((s, p) => s + p.age, 0) / sel.length;
+
+    // Recalculate with sim WAR
+    const preMetrics = calculateMetrics();
+    let postEff = preMetrics.efficiency;
+
+    // Adjust for actual WAR vs projected
+    const warDiff = simWAR - preMetrics.totalWAR;
+    postEff += Math.round(warDiff * 2);
+
+    // Quiz penalty: -5 per wrong answer
+    const quizPenalty = (3 - state.quizScore) * 5;
+    postEff -= quizPenalty;
+    postEff = Math.max(0, Math.min(100, postEff));
+    state.postSimEfficiency = postEff;
+
+    const gz = state.mandate ? state.mandate.greenZone : 75;
+    const isGreen = postEff >= gz;
+    const isYellow = postEff >= 60;
     let zoneClass, zoneLabel, emoji, message;
     if (isGreen) {
         zoneClass = 'zone-green'; zoneLabel = 'Green Zone'; emoji = '\u{1F3C6}';
-        message = "You found the efficient frontier. You balanced talent, value, risk, and upside like a real front-office executive. Data narrowed the range of mistakes — and your instincts closed the deal.";
+        message = "You navigated the season, survived the simulation, and proved your analytical chops. You think like a real GM.";
     } else if (isYellow) {
         zoneClass = 'zone-yellow'; zoneLabel = 'Yellow Zone'; emoji = '\u{1F4CA}';
-        message = "You're close to a contender! Look at your $/WAR and risk metrics. Are you overpaying for declining talent? Can you find hidden gems with better value?";
+        message = "Close! Your roster had promise but the season revealed some cracks. Review your risk management and value picks.";
     } else {
         zoneClass = 'zone-red'; zoneLabel = 'Red Zone'; emoji = '\u{1F4C9}';
-        message = "Your owner is calling an emergency meeting. You might be chasing big names instead of smart value. Remember: the most famous player isn't always the best investment.";
+        message = "The season was rough. Injuries, bad value, or misaligned priorities sank your roster. Time to rethink your strategy.";
     }
 
-    // Generate lessons
+    // Injury count for achievements
+    const injuryCount = sel.filter(p => state.simResults[p.id] && state.simResults[p.id].type === 'injury').length;
+
+    // Lessons
     let lessons = [];
-    if (m.valueScore >= 70) lessons.push("<strong>Moneyball Master:</strong> You found the value edge — paying for production, not reputation. Oakland would be proud.");
-    if (m.valueScore < 40) lessons.push("<strong>Overspending Alert:</strong> Your $/WAR is too high. Look for players where the analytics outpace the price tag.");
-    if (m.ageScore >= 70) lessons.push("<strong>Future-Proofed:</strong> You built around the age curve. Young cores create championship windows, not just championship moments.");
-    if (m.ageScore < 40) lessons.push("<strong>Aging Roster:</strong> Your average age is too high. Remember: players peak at 26-27 and decline after 30.");
-    if (m.riskScore >= 70) lessons.push("<strong>Risk Manager:</strong> Low injury risk means your expected WAR is close to your projected WAR. Availability IS the best ability.");
-    if (m.riskScore < 40) lessons.push("<strong>Injury-Prone:</strong> Too many high-risk players. Your adjusted WAR is way below your raw WAR — that's expected value working against you.");
-    if (m.warScore >= 80) lessons.push("<strong>Talent-Rich:</strong> You loaded up on production. The key question: did you do it efficiently?");
-    if (lessons.length === 0) lessons.push("<strong>Balanced Build:</strong> You spread your resources across multiple dimensions. Keep fine-tuning to find the efficient frontier.");
+    if (preMetrics.valueScore >= 70) lessons.push("<strong>Moneyball Master:</strong> You found the value edge \u2014 paying for production, not reputation.");
+    if (preMetrics.valueScore < 40) lessons.push("<strong>Overspending Alert:</strong> Your $/WAR is too high. Look for undervalued players.");
+    if (preMetrics.ageScore >= 70) lessons.push("<strong>Future-Proofed:</strong> You built around the age curve. Young cores create windows.");
+    if (injuryCount >= 2) lessons.push("<strong>Injury Report:</strong> " + injuryCount + " players went down. High-risk rosters live and die by probability.");
+    if (state.quizScore === 3) lessons.push("<strong>Quiz Ace:</strong> Perfect on the knowledge check. You understand the concepts, not just the patterns.");
+    if (state.quizScore < 2) lessons.push("<strong>Study Up:</strong> The quiz cost you " + quizPenalty + " points. Review $/WAR, expected value, and age curves.");
+    if (state.activeSynergies.some(s => s.bonus > 0)) lessons.push("<strong>Team Chemistry:</strong> Your synergy bonuses show smart roster construction \u2014 the whole exceeds the parts.");
+    if (lessons.length === 0) lessons.push("<strong>Balanced Build:</strong> Keep fine-tuning to find the efficient frontier.");
+
+    // Media narrative
+    const mediaPositive = state.headlines.filter(h => h.includes('BLOCKBUSTER') || h.includes('Future Hall') || h.includes('ALL IN')).length;
+    const mediaNegative = state.headlines.filter(h => h.includes('Who?') || h.includes('puzzling') || h.includes('allergic')).length;
+    let mediaTake = '';
+    if (isGreen && mediaNegative > mediaPositive) {
+        mediaTake = "The media doubted you. The data proved them wrong. That's the Moneyball lesson.";
+    } else if (!isGreen && mediaPositive > mediaNegative) {
+        mediaTake = "The headlines loved your moves. Your analytics department is updating their resumes.";
+    } else if (isGreen) {
+        mediaTake = "Media and analytics aligned \u2014 you found picks everyone can appreciate.";
+    } else {
+        mediaTake = "Both the media and the numbers agree: back to the drawing board.";
+    }
 
     const content = `
         <div style="font-size:48px; margin-bottom: 8px;">${emoji}</div>
-        <h2 style="justify-content:center; font-size: 18px;">Roster Complete!</h2>
-        <div class="win-score">${m.efficiency}</div>
+        <h2 style="justify-content:center; font-size: 18px;">${state.mandate ? state.mandate.name + ' \u2014 ' : ''}Season Complete!</h2>
+
+        <div class="projected-vs-actual">
+            <div class="pva-box">
+                <h4>Pre-Season</h4>
+                <div class="pva-score" style="color: var(--accent-blue);">${state.preSimEfficiency}</div>
+            </div>
+            <div class="pva-box">
+                <h4>Post-Season</h4>
+                <div class="pva-score" style="color: ${isGreen ? 'var(--accent-green)' : isYellow ? 'var(--accent-amber)' : 'var(--accent-red)'};">${postEff}</div>
+            </div>
+        </div>
+
         <div class="win-zone ${zoneClass}">${zoneLabel}</div>
 
         <div class="score-breakdown">
-            ${renderBreakdown('WAR', m.warScore, 'var(--accent-blue)')}
-            ${renderBreakdown('Value', m.valueScore, 'var(--accent-green)')}
-            ${renderBreakdown('Risk', m.riskScore, 'var(--accent-amber)')}
-            ${renderBreakdown('Age', m.ageScore, 'var(--accent-purple)')}
-            ${renderBreakdown('Chemistry', m.chemScore, 'var(--accent-gold)')}
+            ${renderBreakdown('WAR', preMetrics.warScore, 'var(--accent-blue)')}
+            ${renderBreakdown('Value', preMetrics.valueScore, 'var(--accent-green)')}
+            ${renderBreakdown('Risk', preMetrics.riskScore, 'var(--accent-amber)')}
+            ${renderBreakdown('Age', preMetrics.ageScore, 'var(--accent-purple)')}
+            ${renderBreakdown('Chem', preMetrics.chemScore, 'var(--accent-gold)')}
+        </div>
+
+        <div style="font-size:12px; color:var(--text-dim); margin:8px 0;">
+            Synergies: ${preMetrics.synergyBonus >= 0 ? '+' : ''}${preMetrics.synergyBonus} | Luxury Tax: -${preMetrics.luxuryTax.toFixed(1)} | Quiz: -${quizPenalty} | Sim WAR shift: ${warDiff >= 0 ? '+' : ''}${(warDiff*2).toFixed(0)}
+        </div>
+
+        <div class="media-narrative">
+            <h4>\u{1F4F0} Media vs. Reality</h4>
+            <p>${mediaTake}</p>
         </div>
 
         ${isGreen ? `
         <div class="claim-code">
             <div class="code-label">Your Claim Code</div>
             <div class="code-value">L1-201-M3-DATA</div>
-        </div>
-        ` : ''}
+        </div>` : ''}
 
         <p class="win-message">${message}</p>
 
@@ -1556,14 +3002,34 @@ function showResult(m) {
         </div>
 
         <button class="try-again-btn" onclick="closeResult(); resetGame();">
-            ${isGreen ? 'Build Another Roster' : 'Try Again'}
+            ${isGreen ? 'Play Again (New Mandate)' : 'Try Again'}
         </button>
     `;
 
     document.getElementById('resultContent').innerHTML = content;
     document.getElementById('resultModal').classList.add('active');
-
     if (isGreen) spawnConfetti();
+
+    // Save result and check achievements
+    const gameResult = {
+        mandate: state.mandate ? state.mandate.id : 'none',
+        mandateName: state.mandate ? state.mandate.name : 'Standard',
+        finalEfficiency: postEff,
+        preEfficiency: state.preSimEfficiency,
+        totalSalary: simSalary,
+        avgAge: simAge,
+        avgRisk: simRisk,
+        avgFan: sel.reduce((s,p)=>s+p.fanAppeal,0)/sel.length,
+        totalWAR: preMetrics.totalWAR,
+        quizScore: state.quizScore,
+        injuryCount: injuryCount,
+        tradeImproved: state.tradeExecuted && postEff > state.preSimEfficiency,
+        allScouted: sel.every(p => isFullyScouted(p.id)),
+        rosterNames: sel.map(p => p.name),
+        date: new Date().toISOString().slice(0, 10)
+    };
+    saveGameResult(gameResult);
+    checkAchievements(gameResult);
 }
 
 function renderBreakdown(label, score, color) {
@@ -1573,6 +3039,109 @@ function renderBreakdown(label, score, color) {
         <div class="bd-bar"><div class="bd-bar-fill" style="width:${score}%; background:${color};"></div></div>
     </div>`;
 }
+
+// ========================================
+// LEADERBOARD & ACHIEVEMENTS
+// ========================================
+function saveGameResult(result) {
+    const lb = JSON.parse(localStorage.getItem('gm_leaderboard') || '[]');
+    lb.push(result);
+    // Keep best per mandate
+    localStorage.setItem('gm_leaderboard', JSON.stringify(lb));
+}
+
+function loadLeaderboard() {
+    return JSON.parse(localStorage.getItem('gm_leaderboard') || '[]');
+}
+
+function getBestPerMandate() {
+    const lb = loadLeaderboard();
+    const best = {};
+    lb.forEach(entry => {
+        const key = entry.mandate || 'none';
+        if (!best[key] || entry.finalEfficiency > best[key].finalEfficiency) {
+            best[key] = entry;
+        }
+    });
+    return best;
+}
+
+function checkAchievements(gameResult) {
+    let newUnlocks = [];
+    const unlockedBefore = [...state.achievements];
+    gameResult.unlockedCount = state.achievements.length;
+
+    ACHIEVEMENTS.forEach(ach => {
+        if (state.achievements.includes(ach.id)) return;
+        try {
+            if (ach.test(gameResult)) {
+                state.achievements.push(ach.id);
+                newUnlocks.push(ach);
+            }
+        } catch(e) {}
+    });
+
+    // Check Complete GM (needs all others)
+    if (!state.achievements.includes('complete_gm') && state.achievements.length >= 11) {
+        state.achievements.push('complete_gm');
+        newUnlocks.push(ACHIEVEMENTS.find(a => a.id === 'complete_gm'));
+    }
+
+    localStorage.setItem('gm_achievements', JSON.stringify(state.achievements));
+
+    // Show toasts
+    newUnlocks.forEach((ach, i) => {
+        setTimeout(() => {
+            const t = document.getElementById('toast');
+            t.className = 'toast achievement-toast show';
+            t.textContent = `\u{1F3C5} Achievement Unlocked: ${ach.emoji} ${ach.name}!`;
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => { t.classList.remove('show'); t.className = 'toast'; }, 3000);
+        }, (i + 1) * 1500);
+    });
+}
+
+function showLeaderboard() {
+    const best = getBestPerMandate();
+    const lbContent = document.getElementById('lbContent');
+
+    let lbHTML = '<h2>\u{1F3C6} Record Book</h2>';
+    lbHTML += '<div class="lb-tabs"><button class="lb-tab active" onclick="showLBTab(\'records\', this)">Best Scores</button><button class="lb-tab" onclick="showLBTab(\'achievements\', this)">Achievements</button></div>';
+    lbHTML += '<div id="lbRecords">';
+    const mandateNames = { win_now: '\u{1F525} Win Now', moneyball: '\u{1F4B0} Moneyball', brand: '\u{2B50} Build the Brand', youth: '\u{1F331} Youth Movement', protect: '\u{1F6E1}\u{FE0F} Protect', championship: '\u{1F3C6} Championship', none: '\u{1F4CB} Standard' };
+    if (Object.keys(best).length === 0) {
+        lbHTML += '<p style="color:var(--text-dim); text-align:center; padding:20px;">No games completed yet. Play a game to see your records here!</p>';
+    } else {
+        for (const [key, entry] of Object.entries(best)) {
+            const color = entry.finalEfficiency >= 75 ? 'var(--accent-green)' : entry.finalEfficiency >= 60 ? 'var(--accent-amber)' : 'var(--accent-red)';
+            lbHTML += `<div class="lb-entry"><span class="lb-mandate">${mandateNames[key] || key}</span><span class="lb-score" style="color:${color}">${entry.finalEfficiency}</span></div>`;
+        }
+    }
+    lbHTML += '</div>';
+
+    lbHTML += '<div id="lbAchievements" style="display:none;"><div class="achievement-grid">';
+    const unlocked = state.achievements.length;
+    ACHIEVEMENTS.forEach(ach => {
+        const isUnlocked = state.achievements.includes(ach.id);
+        lbHTML += `<div class="achievement-item ${isUnlocked ? 'unlocked' : 'locked'}">
+            <div class="ach-icon">${ach.emoji}</div>
+            <div class="ach-name">${ach.name}</div>
+        </div>`;
+    });
+    lbHTML += `</div><p style="text-align:center; margin-top:10px; font-size:12px; color:var(--text-dim);">${unlocked}/${ACHIEVEMENTS.length} Achievements Unlocked</p></div>`;
+
+    lbContent.innerHTML = lbHTML;
+    document.getElementById('lbModal').classList.add('active');
+}
+
+function showLBTab(tab, btn) {
+    document.querySelectorAll('.lb-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('lbRecords').style.display = tab === 'records' ? 'block' : 'none';
+    document.getElementById('lbAchievements').style.display = tab === 'achievements' ? 'block' : 'none';
+}
+
+function closeLB() { document.getElementById('lbModal').classList.remove('active'); }
 
 // ========================================
 // CONFETTI
@@ -1589,7 +3158,6 @@ function spawnConfetti() {
             piece.style.height = (Math.random() * 12 + 4) + 'px';
             piece.style.background = colors[Math.floor(Math.random() * colors.length)];
             piece.style.animationDuration = (Math.random() * 2 + 2) + 's';
-            piece.style.animationDelay = '0s';
             document.body.appendChild(piece);
             setTimeout(() => piece.remove(), 4000);
         }, i * 30);
@@ -1600,19 +3168,17 @@ function spawnConfetti() {
 // SORTING
 // ========================================
 let currentSort = 'default';
-
 function getCurrentSort() {
     const sortFns = {
         default: (a, b) => a.tierOrder - b.tierOrder,
-        war: (a, b) => b.war - a.war,
+        war: (a, b) => getSortWAR(b) - getSortWAR(a),
         salary: (a, b) => b.salary - a.salary,
         age: (a, b) => a.age - b.age,
-        cpw: (a, b) => (a.salary / a.war) - (b.salary / b.war),
-        fan: (a, b) => b.fanAppeal - a.fanAppeal || b.war - a.war
+        cpw: (a, b) => getSortCPW(a) - getSortCPW(b),
+        fan: (a, b) => b.fanAppeal - a.fanAppeal || getSortWAR(b) - getSortWAR(a)
     };
     return [...PLAYERS].sort(sortFns[currentSort] || sortFns.default);
 }
-
 function sortPlayers(key, btn) {
     currentSort = key;
     document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
@@ -1629,30 +3195,21 @@ function showInfo(topic) {
     document.getElementById('infoContent').innerHTML = `<h2>${info.title}</h2>${info.body}`;
     document.getElementById('infoModal').classList.add('active');
 }
+function closeInfo() { document.getElementById('infoModal').classList.remove('active'); }
+function closeResult() { document.getElementById('resultModal').classList.remove('active'); }
 
-function closeInfo() {
-    document.getElementById('infoModal').classList.remove('active');
-}
-
-function closeResult() {
-    document.getElementById('resultModal').classList.remove('active');
-}
-
-// Close modals on overlay click
-document.getElementById('infoModal').addEventListener('click', function(e) {
-    if (e.target === this) closeInfo();
-});
-document.getElementById('resultModal').addEventListener('click', function(e) {
-    if (e.target === this) closeResult();
-});
+document.getElementById('infoModal').addEventListener('click', function(e) { if (e.target === this) closeInfo(); });
+document.getElementById('resultModal').addEventListener('click', function(e) { if (e.target === this) closeResult(); });
+document.getElementById('compareModal').addEventListener('click', function(e) { if (e.target === this) closeCompare(); });
+document.getElementById('lbModal').addEventListener('click', function(e) { if (e.target === this) closeLB(); });
 
 let toastTimer;
 function showToast(msg) {
     const t = document.getElementById('toast');
+    t.className = 'toast show';
     t.textContent = msg;
-    t.classList.add('show');
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+    toastTimer = setTimeout(() => { t.classList.remove('show'); }, 2500);
 }
 
 // ========================================
@@ -1660,8 +3217,54 @@ function showToast(msg) {
 // ========================================
 function resetGame() {
     state.selected.clear();
+    state.scoutTokens = 8;
+    state.scouted = {};
+    state.simResults = null;
+    state.gamePhase = 'drafting';
+    state.rivalPicks = [];
+    state.headlines = [];
+    state.compareMode = false;
+    state.compareSlots = [null, null];
+    state.quizScore = 0;
+    state.activeSynergies = [];
+    state.tradeExecuted = false;
+    state._tradeFee = 0;
+    state.preSimEfficiency = 0;
+    state.postSimEfficiency = 0;
     hasShownResult = false;
+
+    // Draw new mandate
+    selectMandate();
+
+    document.getElementById('scoutTokenCount').textContent = state.scoutTokens;
+    document.getElementById('mediaTicker').classList.remove('active');
+    document.getElementById('compareToggle').classList.remove('active');
     updateEverything();
+}
+
+// ========================================
+// MANDATE SELECTION
+// ========================================
+function selectMandate() {
+    state.mandate = MANDATES[Math.floor(Math.random() * MANDATES.length)];
+    if (state.mandate.budgetOverride) state.budget = state.mandate.budgetOverride;
+    else state.budget = 200;
+
+    const banner = document.getElementById('mandateBanner');
+    document.getElementById('mandateEmoji').textContent = state.mandate.emoji;
+    document.getElementById('mandateName').textContent = state.mandate.name;
+    document.getElementById('mandateDesc').textContent = state.mandate.description;
+    const constraintEl = document.getElementById('mandateConstraint');
+    if (state.mandate.constraint) {
+        constraintEl.textContent = state.mandate.constraint;
+        constraintEl.style.display = 'inline-block';
+    } else {
+        constraintEl.style.display = 'none';
+    }
+    banner.classList.add('active');
+
+    // Update green zone label
+    document.getElementById('greenZoneLabel').textContent = `Green Zone (${state.mandate.greenZone}+)`;
 }
 
 // ========================================
@@ -1669,17 +3272,23 @@ function resetGame() {
 // ========================================
 function startGame() {
     document.getElementById('introOverlay').classList.add('hidden');
+    selectMandate();
+    updateEverything();
 }
 
 // Initial render
 renderCards(getCurrentSort());
 updateDashboard(calculateMetrics());
+updatePositionMap();
+updatePlayoffOdds(calculateMetrics());
 
 // Keyboard shortcuts
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         closeInfo();
         closeResult();
+        closeCompare();
+        closeLB();
     }
 });
 </script>
