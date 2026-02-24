@@ -200,11 +200,19 @@
             font-size: 16px;
         }
         .owner-mood {
-            font-size: 28px;
+            font-size: 14px;
             transition: transform 0.3s ease;
             cursor: help;
             position: relative;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 20px;
+            padding: 4px 10px;
         }
+        .mood-emoji { font-size: 20px; }
+        .mood-label { font-size: 11px; color: var(--text-secondary); font-weight: 600; letter-spacing: 0.5px; }
         .owner-mood:hover::after {
             content: attr(data-tip);
             position: absolute;
@@ -604,6 +612,33 @@
         .tier-value .card-tier-accent { background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple)); }
         .tier-trap .card-tier-accent { background: linear-gradient(90deg, var(--accent-red), #ff6b6b); }
         .tier-gem .card-tier-accent { background: linear-gradient(90deg, var(--accent-green), #00cc6a); }
+        .tier-albatross .card-tier-accent { background: linear-gradient(90deg, #ff7043, #ff4500); }
+
+        /* Tier pill badge */
+        .tier-pill {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #fff;
+            z-index: 10;
+            text-transform: uppercase;
+        }
+        .tier-pill.tier-elite { background: linear-gradient(90deg, #b8860b, #ffd700); color: #000; }
+        .tier-pill.tier-value { background: linear-gradient(90deg, #0077b6, #00d4ff); }
+        .tier-pill.tier-trap { background: linear-gradient(90deg, #cc2244, #ff3355); }
+        .tier-pill.tier-gem { background: linear-gradient(90deg, #00994d, #00ff88); color: #000; }
+        .tier-pill.tier-albatross { background: linear-gradient(90deg, #e64a19, #ff7043); }
+
+        /* Staggered card entrance animation */
+        @keyframes cardSlideIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
         .card-body {
             padding: 14px 16px;
@@ -631,6 +666,7 @@
         .tier-value .card-avatar { background: linear-gradient(135deg, #0077b6, #00d4ff); }
         .tier-trap .card-avatar { background: linear-gradient(135deg, #cc2244, #ff3355); }
         .tier-gem .card-avatar { background: linear-gradient(135deg, #00994d, #00ff88); }
+        .tier-albatross .card-avatar { background: linear-gradient(135deg, #e64a19, #ff7043); }
 
         .card-name-block { flex: 1; min-width: 0; }
         .card-name {
@@ -999,8 +1035,11 @@
             animation: tickerSlide 0.4s ease;
         }
         .sim-event.injury { background: rgba(255,51,85,0.1); border-left: 3px solid var(--accent-red); color: var(--accent-red); }
+        .sim-event.injury.mild { background: rgba(255,150,100,0.1); border-left: 3px solid var(--accent-amber); color: var(--accent-amber); }
+        .sim-event.injury.severe { background: rgba(180,0,30,0.15); border-left: 3px solid #cc0022; color: #ff2244; }
         .sim-event.breakout { background: rgba(0,255,136,0.1); border-left: 3px solid var(--accent-green); color: var(--accent-green); }
         .sim-event.steady { background: rgba(255,255,255,0.03); border-left: 3px solid var(--text-dim); color: var(--text-secondary); }
+        .sim-event.regression { background: rgba(255,180,0,0.1); border-left: 3px solid var(--accent-amber); color: var(--accent-amber); }
 
         /* ===== TRADE MODAL ===== */
         .trade-modal .modal { max-width: 700px; }
@@ -1396,7 +1435,7 @@
         <div class="budget-section">
             <span class="budget-label">Budget</span>
             <div class="budget-bar-wrap">
-                <div class="luxury-tax-marker" title="Luxury Tax Threshold ($160M)"></div>
+                <div class="luxury-tax-marker" id="luxuryTaxMarker" title="Luxury Tax Threshold ($160M)"></div>
                 <div class="budget-bar" id="budgetBar"></div>
             </div>
             <span class="budget-text" id="budgetText">$0M / $200M</span>
@@ -1404,7 +1443,10 @@
         <div style="display:flex; align-items:center; gap: 12px; flex-wrap: wrap;">
             <div class="scout-tokens" id="scoutTokensDisplay">&#128270; Scouts: <strong id="scoutTokenCount">8</strong></div>
             <div class="roster-count">Roster: <strong id="rosterCount">0</strong>/9</div>
-            <div class="owner-mood" id="ownerMood" data-tip="Owner is waiting...">&#128528;</div>
+            <div class="owner-mood" id="ownerMood" data-tip="Owner is waiting..." aria-label="Owner mood: waiting">
+                <span class="mood-emoji" id="moodEmoji">&#128528;</span>
+                <span class="mood-label" id="moodLabel">Owner: Neutral</span>
+            </div>
         </div>
     </div>
 
@@ -1496,6 +1538,14 @@
         <button class="sort-btn" data-sort="cpw" onclick="sortPlayers('cpw', this)">$/WAR</button>
         <button class="sort-btn" data-sort="fan" onclick="sortPlayers('fan', this)">Fan Appeal</button>
     </div>
+    <div class="sort-group" id="filterGroup">
+        <span class="sort-label">Filter:</span>
+        <button class="sort-btn active" data-filter="all" onclick="filterPlayers('all', this)">All</button>
+        <button class="sort-btn" data-filter="SP" onclick="filterPlayers('SP', this)">SP</button>
+        <button class="sort-btn" data-filter="C" onclick="filterPlayers('C', this)">C</button>
+        <button class="sort-btn" data-filter="IF" onclick="filterPlayers('IF', this)">IF</button>
+        <button class="sort-btn" data-filter="OF" onclick="filterPlayers('OF', this)">OF</button>
+    </div>
     <div class="ctrl-btn-group">
         <button class="compare-btn" id="compareToggle" onclick="toggleCompareMode()">&#128200; Compare</button>
         <button class="reset-btn" onclick="resetGame()">Reset Roster</button>
@@ -1507,59 +1557,59 @@
 
 <!-- ===== INFO MODAL ===== -->
 <div class="modal-overlay" id="infoModal">
-    <div class="modal">
-        <button class="modal-close" onclick="closeInfo()">&times;</button>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="infoContent">
+        <button class="modal-close" onclick="closeInfo()" aria-label="Close info">&times;</button>
         <div id="infoContent"></div>
     </div>
 </div>
 
 <!-- ===== RESULT MODAL ===== -->
 <div class="modal-overlay win-modal" id="resultModal">
-    <div class="modal">
-        <button class="modal-close" onclick="closeResult()">&times;</button>
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Season Results">
+        <button class="modal-close" onclick="closeResult()" aria-label="Close results">&times;</button>
         <div id="resultContent"></div>
     </div>
 </div>
 
 <!-- ===== SIMULATION MODAL ===== -->
 <div class="modal-overlay sim-modal" id="simModal">
-    <div class="modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Season Simulation">
         <div id="simContent"></div>
     </div>
 </div>
 
 <!-- ===== TRADE MODAL ===== -->
 <div class="modal-overlay trade-modal" id="tradeModal">
-    <div class="modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Trade Deadline">
         <div id="tradeContent"></div>
     </div>
 </div>
 
 <!-- ===== QUIZ MODAL ===== -->
 <div class="modal-overlay quiz-modal" id="quizModal">
-    <div class="modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="GM Knowledge Quiz">
         <div id="quizContent"></div>
     </div>
 </div>
 
 <!-- ===== COMPARISON MODAL ===== -->
 <div class="modal-overlay compare-modal" id="compareModal">
-    <div class="modal">
-        <button class="modal-close" onclick="closeCompare()">&times;</button>
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Player Comparison">
+        <button class="modal-close" onclick="closeCompare()" aria-label="Close comparison">&times;</button>
         <div id="compareContent"></div>
     </div>
 </div>
 
 <!-- ===== LEADERBOARD MODAL ===== -->
 <div class="modal-overlay lb-modal" id="lbModal">
-    <div class="modal">
-        <button class="modal-close" onclick="closeLB()">&times;</button>
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Record Book">
+        <button class="modal-close" onclick="closeLB()" aria-label="Close leaderboard">&times;</button>
         <div id="lbContent"></div>
     </div>
 </div>
 
 <!-- ===== TOAST ===== -->
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
 // ========================================
@@ -1624,14 +1674,14 @@ const PLAYERS = [
       scout: "Former MVP still producing — but at $30M for 4 WAR, you're paying for the brand, not the bargain.",
       injuryHeadline: "Betts fractures hand on HBP. Out 6-8 weeks.",
       breakoutHeadline: "Betts turning back the clock — Gold Glove defense at short." },
-    { id: 12, name: "Trea Turner", position: "SS", posGroup: "IF", age: 31, war: 3.0, salary: 27.0, contractYears: 7, injuryRisk: 30, fanAppeal: 3, tier: "trap", tierOrder: 11,
+    { id: 12, name: "Trea Turner", position: "SS", posGroup: "IF", age: 31, war: 3.0, salary: 27.0, contractYears: 7, injuryRisk: 30, fanAppeal: 3, tier: "albatross", tierOrder: 11,
       warRange: [1.0, 5.0], riskLabel: "High",
-      scout: "Speed is the first tool to go, and the hamstrings are a recurring nightmare. The definition of albatross risk.",
+      scout: "Speed is the first tool to go, and the hamstrings are a recurring nightmare. 7 years left at $27M is a cap-crippling commitment.",
       injuryHeadline: "BREAKING: Trea Turner re-injures hamstring. Headed to 60-day IL.",
       breakoutHeadline: "Turner looks healthy — 3 steals in tonight's win." },
-    { id: 13, name: "Carlos Correa", position: "SS", posGroup: "IF", age: 30, war: 3.5, salary: 33.0, contractYears: 8, injuryRisk: 35, fanAppeal: 3, tier: "trap", tierOrder: 12,
+    { id: 13, name: "Carlos Correa", position: "SS", posGroup: "IF", age: 30, war: 3.5, salary: 33.0, contractYears: 8, injuryRisk: 35, fanAppeal: 3, tier: "albatross", tierOrder: 12,
       warRange: [1.5, 5.5], riskLabel: "High",
-      scout: "Talented but fragile. The back issues are chronic. At $33M/yr with 8 years left, this contract could cripple your cap flexibility.",
+      scout: "Talented but fragile. The back issues are chronic. At $33M/yr with 8 years left, this is the quintessential albatross contract — handcuffs your front office for a decade.",
       injuryHeadline: "BREAKING: Correa's back flares up again. Third IL stint this season.",
       breakoutHeadline: "Correa drives in 5 — back looking healthy so far." },
     { id: 14, name: "Max Scherzer", position: "SP", posGroup: "SP", age: 40, war: 2.0, salary: 22.0, contractYears: 1, injuryRisk: 45, fanAppeal: 3, tier: "trap", tierOrder: 13,
@@ -1669,7 +1719,60 @@ const PLAYERS = [
       warRange: [1.5, 5.5], riskLabel: "Low",
       scout: "Three batting titles by age 27. Doesn't hit homers — but puts the bat on the ball better than anyone alive.",
       injuryHeadline: "Arraez dealing with knee soreness, day-to-day.",
-      breakoutHeadline: "Arraez chasing .400 into June — contact king." }
+      breakoutHeadline: "Arraez chasing .400 into June — contact king." },
+    // ADDITIONAL VALUE CATCHERS
+    { id: 21, name: "Will Smith", position: "C", posGroup: "C", age: 30, war: 4.0, salary: 19.0, contractYears: 5, injuryRisk: 20, fanAppeal: 3, tier: "value", tierOrder: 9,
+      warRange: [2.5, 5.5], riskLabel: "Med",
+      scout: "Second-best catcher on this board. Commands the strike zone, calls a great game. The Raleigh-vs-Smith debate is your first real decision.",
+      injuryHeadline: "Smith exits with knee soreness. X-rays negative.",
+      breakoutHeadline: "Will Smith heating up — 8 HR in his last 12 games." },
+    { id: 22, name: "Gabriel Moreno", position: "C", posGroup: "C", age: 24, war: 3.0, salary: 6.0, contractYears: 5, injuryRisk: 10, fanAppeal: 2, tier: "gem", tierOrder: 20,
+      warRange: [1.5, 4.5], riskLabel: "Low",
+      scout: "Pre-arb backstop with elite receiving grades. Low upside right now, but the cost makes him a legit third catcher option.",
+      injuryHeadline: "Moreno sits with hand bruise after foul tip.",
+      breakoutHeadline: "Moreno breaks out — 5-game hit streak behind the plate!" },
+    { id: 23, name: "Adley Rutschman", position: "C", posGroup: "C", age: 27, war: 5.0, salary: 18.0, contractYears: 5, injuryRisk: 10, fanAppeal: 3, tier: "value", tierOrder: 9,
+      warRange: [3.5, 6.5], riskLabel: "Low",
+      scout: "The best catching prospect to debut in 10 years, now living up to it. Best all-around catcher on this board.",
+      injuryHeadline: "Rutschman day-to-day with forearm tightness.",
+      breakoutHeadline: "Rutschman is rolling — hitting .320 with 8 HR in May." },
+    // ADDITIONAL SP
+    { id: 24, name: "Tyler Glasnow", position: "SP", posGroup: "SP", age: 31, war: 4.0, salary: 22.0, contractYears: 5, injuryRisk: 35, fanAppeal: 3, tier: "trap", tierOrder: 13,
+      warRange: [2.0, 6.0], riskLabel: "High",
+      scout: "When healthy, a top-10 starter. The key word is healthy. Elbow surgeries stack up — buyer beware.",
+      injuryHeadline: "BREAKING: Glasnow lands on 60-day IL with elbow inflammation.",
+      breakoutHeadline: "Glasnow dealing! 12 Ks and counting through 6 innings." },
+    { id: 25, name: "Yoshinobu Yamamoto", position: "SP", posGroup: "SP", age: 26, war: 6.0, salary: 32.0, contractYears: 12, injuryRisk: 15, fanAppeal: 4, tier: "elite", tierOrder: 3,
+      warRange: [4.5, 7.5], riskLabel: "Low",
+      scout: "NPB ace living up to the hype. Long contract is the only concern — but at his age and risk profile, locking in 12 years is manageable.",
+      injuryHeadline: "Yamamoto exits with shoulder tightness. MRI scheduled.",
+      breakoutHeadline: "Yamamoto perfecto through 7 — ace-level stuff every start." },
+    { id: 26, name: "Michael King", position: "SP", posGroup: "SP", age: 29, war: 4.5, salary: 14.0, contractYears: 5, injuryRisk: 15, fanAppeal: 2, tier: "value", tierOrder: 8,
+      warRange: [3.0, 6.0], riskLabel: "Low",
+      scout: "Quietly one of the best values on the pitching market. Made the starter transition seamlessly. Media ignores him — that's your edge.",
+      injuryHeadline: "King scratched with forearm soreness. Day-to-day.",
+      breakoutHeadline: "Michael King dominant — 20 straight scoreless innings!" },
+    { id: 27, name: "Tarik Skubal", position: "SP", posGroup: "SP", age: 28, war: 6.5, salary: 20.0, contractYears: 6, injuryRisk: 15, fanAppeal: 3, tier: "value", tierOrder: 8,
+      warRange: [5.0, 8.0], riskLabel: "Low",
+      scout: "2024 AL Cy Young. Extension price looks expensive until you see his strikeout rate and xFIP. Premium production at a value price.",
+      injuryHeadline: "Skubal exits early with blister. Not considered serious.",
+      breakoutHeadline: "Skubal continues Cy Young campaign — 0.98 ERA in June!" },
+    // ADDITIONAL POSITION PLAYERS
+    { id: 28, name: "Bryce Harper", position: "1B", posGroup: "IF", age: 32, war: 4.5, salary: 27.0, contractYears: 4, injuryRisk: 25, fanAppeal: 5, tier: "trap", tierOrder: 10,
+      warRange: [2.5, 6.5], riskLabel: "Med-High",
+      scout: "Maximum star power, maximum salary. The elbow surgery scarred his arm value but the bat still shows up. Fan Appeal 5 in a Brand mandate? Tempting — but $27M for 4.5 WAR is an overpay.",
+      injuryHeadline: "Harper exits with forearm tightness. Elbow a concern.",
+      breakoutHeadline: "Bryce Harper going FULL MVP mode — hits walk-off grand slam!" },
+    { id: 29, name: "Manny Machado", position: "3B", posGroup: "IF", age: 32, war: 3.5, salary: 28.0, contractYears: 7, injuryRisk: 20, fanAppeal: 3, tier: "trap", tierOrder: 10,
+      warRange: [2.0, 5.0], riskLabel: "Med",
+      scout: "Smooth fielder, underrated bat — but seven more years at $28M? The back-loading math is brutal for cap flexibility. Classic trap.",
+      injuryHeadline: "Machado deals with hamstring tightness. Day-to-day.",
+      breakoutHeadline: "Machado looking spry — playing some of the best defense of his career." },
+    { id: 30, name: "Steven Kwan", position: "OF", posGroup: "OF", age: 27, war: 4.0, salary: 11.0, contractYears: 4, injuryRisk: 10, fanAppeal: 2, tier: "gem", tierOrder: 20,
+      warRange: [2.5, 5.5], riskLabel: "Low",
+      scout: "Elite contact, elite defense, zero hype. Classic gem profile — overlooked because he doesn't hit bombs. The analytics crowd loves him.",
+      injuryHeadline: "Kwan sits with hamstring tightness. Precautionary.",
+      breakoutHeadline: "Steven Kwan on a tear — .370 average in his last 20 games!" }
 ];
 
 // ========================================
@@ -1776,6 +1879,30 @@ const MANDATES = [
       weightOverrides: { war: 0.30, value: 0.20, risk: 0.20, age: 0.15, chem: 0.15 },
       hardCaps: { minElite: 2 },
       greenZone: 80
+    },
+    { id: 'underdog', name: 'Underdog Story', emoji: '\u{1F937}',
+      description: 'Budget slashed to $90M — the lowest in the league. No Elite-tier players allowed. Pure analytics wins here.',
+      constraint: 'Budget $90M. No Elite-tier players allowed.',
+      budgetOverride: 90,
+      weightOverrides: { value: 0.45, war: 0.25, risk: 0.15, age: 0.15 },
+      hardCaps: { noElite: true },
+      greenZone: 70
+    },
+    { id: 'veteran', name: 'Veteran Leadership', emoji: '\u{1F9D3}',
+      description: 'The owner wants proven vets in the clubhouse. Must have at least 3 players age 31 or older.',
+      constraint: 'Must have 3+ players age 31+',
+      budgetOverride: null,
+      weightOverrides: { war: 0.25, value: 0.20, risk: 0.15, age: 0.30, chem: 0.10 },
+      hardCaps: { minVets: 3, capAt: 60 },
+      greenZone: 75
+    },
+    { id: 'pitching_first', name: 'Pitching First', emoji: '\u26BE',
+      description: 'Championship teams are built on pitching. Must have 3 starting pitchers on your roster.',
+      constraint: 'Must have 3+ SP on roster',
+      budgetOverride: null,
+      weightOverrides: { war: 0.30, risk: 0.25, value: 0.25, age: 0.10, chem: 0.10 },
+      hardCaps: { minSP: 3, capAt: 55 },
+      greenZone: 75
     }
 ];
 
@@ -1798,7 +1925,29 @@ const SYNERGIES = [
     { name: "Moneyball Squad", emoji: "\u{1F4B5}", bonus: 5,
       flavor: "Billy Beane would be proud — maximum efficiency",
       test: (ps) => { const total = ps.reduce((s,p)=>s+p.salary,0); const war = ps.reduce((s,p)=>s+p.war,0); return war > 0 && (total/war) < 3.0; } },
-    // Penalties
+    { name: "Pitching Fortress", emoji: "\u26BE", bonus: 4,
+      flavor: "Championship teams are built on pitching — dominant arms lock down games",
+      test: (ps) => ps.filter(p => p.posGroup === 'SP').length >= 3 && ps.filter(p => p.posGroup === 'SP').reduce((s,p)=>s+p.war,0) >= 12 },
+    { name: "Youth Explosion", emoji: "\u{1F4A5}", bonus: 3,
+      flavor: "Young talent floods the system — the future is now",
+      test: (ps) => ps.filter(p => p.age <= 24).length >= 4 },
+    { name: "Contact Kings", emoji: "\u{1F91C}", bonus: 2,
+      flavor: "A loaded infield that puts the ball in play",
+      test: (ps) => ps.filter(p => p.posGroup === 'IF').length >= 3 },
+    { name: "Budget Surplus", emoji: "\u{1F4C8}", bonus: 3,
+      flavor: "Cap space is an asset — flexibility to chase midseason additions",
+      test: (ps) => { const total = ps.reduce((s,p)=>s+p.salary,0); return (state.budget - total) >= 50; } },
+    { name: "Analytics Edge", emoji: "\u{1F4BB}", bonus: 4,
+      flavor: "Finding diamonds in the rough — the front office advantage",
+      test: (ps) => ps.filter(p => p.tier === 'gem').length >= 3 },
+    // New Penalties
+    { name: "Albatross Loaded", emoji: "\u{1F426}", bonus: -6,
+      flavor: "Two crippling contracts destroy cap flexibility for years",
+      test: (ps) => ps.filter(p => p.tier === 'albatross').length >= 2 },
+    { name: "All Aces", emoji: "\u{1F4B8}", bonus: -3,
+      flavor: "Paying brand-name prices for declining pitchers",
+      test: (ps) => ps.filter(p => p.posGroup === 'SP' && (p.tier === 'trap' || p.tier === 'albatross')).length >= 2 },
+    // Existing Penalties
     { name: "Injury Ward", emoji: "\u{1F3E5}", bonus: -5,
       flavor: "Your medical staff is overwhelmed",
       test: (ps) => ps.filter(p => p.injuryRisk >= 25).length >= 3 },
@@ -1814,36 +1963,73 @@ const SYNERGIES = [
 // QUIZ POOL
 // ========================================
 const QUIZ_POOL = [
+    // BASIC difficulty
     { question: "Player X earns $30M and projects 4.0 WAR. Player Y earns $8M and projects 3.0 WAR. Which is the better VALUE?",
       options: ["Player X — higher WAR means more value", "Player Y — $2.67M/WAR vs $7.5M/WAR", "They're equal value", "Need more information"],
-      correctIndex: 1, explanation: "Value = production per dollar. Y costs $2.67M per WAR vs X's $7.5M per WAR. Y gives you 2.8x more value per dollar." },
-    { question: "A player has 6.0 projected WAR and 40% injury risk. What is their expected WAR?",
-      options: ["6.0 — WAR doesn't change", "3.6 — multiply WAR by healthy probability", "2.4 — multiply WAR by risk", "4.0 — subtract the risk percentage"],
-      correctIndex: 1, explanation: "Expected WAR = WAR x (1 - risk). 6.0 x 0.60 = 3.6. You multiply by the probability they STAY healthy." },
-    { question: "You can sign a 25-year-old (5.0 WAR) or a 33-year-old (6.0 WAR) to a 5-year deal. Who gives more total value?",
-      options: ["The 33-year-old — 6.0 WAR is higher right now", "The 25-year-old — their WAR grows while the veteran's declines", "Whichever costs less", "The older player is always safer"],
-      correctIndex: 1, explanation: "The 25-year-old's WAR improves each year (5.0 > 5.3 > 5.6...) while the 33-year-old declines (6.0 > 5.2 > 4.4...). Over 5 years, youth wins." },
-    { question: "You spend $45M on a veteran. Next summer, a young superstar hits free agency at $20M. What concept describes what you lost?",
-      options: ["Sunk cost", "Opportunity cost", "Supply and demand", "Diminishing returns"],
-      correctIndex: 1, explanation: "Opportunity cost — by committing $45M now, you can't afford the $20M superstar later. Every dollar spent is a dollar unavailable for future moves." },
-    { question: "You signed a player for $30M but he's hurt and producing 1.0 WAR. Should you keep starting him because you paid so much?",
-      options: ["Yes — you need to get your money's worth", "No — that's the sunk cost fallacy", "Yes — benching him wastes the investment", "It depends on his contract length"],
-      correctIndex: 1, explanation: "The $30M is already spent (sunk). Starting decisions should be based on CURRENT production, not past spending. That's the sunk cost fallacy." },
-    { question: "Two pitchers: Pitcher A has 4.0 WAR, $4M salary. Pitcher B has 5.0 WAR, $22M salary. Your budget is tight. Who should you sign?",
-      options: ["Pitcher B — more WAR is always better", "Pitcher A — $1M/WAR vs $4.4M/WAR, reinvest the $18M savings", "Neither — find a free agent", "Pitcher B — the extra 1.0 WAR is worth it"],
-      correctIndex: 1, explanation: "Pitcher A at $1M/WAR is elite value. The $18M saved can buy ~4-5 additional WAR elsewhere. Total roster WAR is what matters, not individual WAR." },
-    { question: "What does the 'age curve' tell us about a 35-year-old player's likely trajectory?",
-      options: ["They'll maintain current production", "They're likely to improve with experience", "They're likely to decline significantly each year", "Age doesn't predict performance"],
-      correctIndex: 2, explanation: "Research shows players decline ~0.8 WAR/year after 33 and ~1.0 WAR/year after 36. A 35-year-old with 4.0 WAR projects ~3.2 next year and ~2.4 the year after." },
-    { question: "A team spends $180M total salary in a league with a $160M luxury tax threshold. What is the tax penalty?",
-      options: ["$0 — they're under $200M", "$20M in fines", "-10 efficiency points at $0.5/M over threshold", "They're blocked from signing more players"],
-      correctIndex: 2, explanation: "Each $1M over the $160M threshold costs -0.5 efficiency points. $180M - $160M = $20M over x 0.5 = -10 point penalty." },
+      correctIndex: 1, explanation: "Value = production per dollar. Y costs $2.67M per WAR vs X's $7.5M per WAR. Y gives you 2.8x more value per dollar.",
+      difficulty: 'basic', concept: 'valueOverReplacement' },
     { question: "Why are pre-arbitration players (young, team-controlled) so valuable to front offices?",
       options: ["They always perform better than veterans", "They provide premium production at a fraction of market price", "They have no injury risk", "Fans prefer young players"],
-      correctIndex: 1, explanation: "Pre-arb players like Paul Skenes ($3M for 5.5 WAR = $0.5M/WAR) provide star production at minimum salaries. That's 15-20x better value than market rate." },
+      correctIndex: 1, explanation: "Pre-arb players like Paul Skenes ($3M for 5.5 WAR = $0.5M/WAR) provide star production at minimum salaries. That's 15-20x better value than market rate.",
+      difficulty: 'basic', concept: 'valueOverReplacement' },
+    { question: "You signed a player for $30M but he's hurt and producing 1.0 WAR. Should you keep starting him because you paid so much?",
+      options: ["Yes — you need to get your money's worth", "No — that's the sunk cost fallacy", "Yes — benching him wastes the investment", "It depends on his contract length"],
+      correctIndex: 1, explanation: "The $30M is already spent (sunk). Starting decisions should be based on CURRENT production, not past spending. That's the sunk cost fallacy.",
+      difficulty: 'basic', concept: 'opportunityCost' },
+    { question: "A team spends $180M total salary in a league with a $160M luxury tax threshold. What is the tax penalty?",
+      options: ["$0 — they're under $200M", "$20M in fines", "-10 efficiency points at $0.5/M over threshold", "They're blocked from signing more players"],
+      correctIndex: 2, explanation: "Each $1M over the $160M threshold costs -0.5 efficiency points. $180M - $160M = $20M over x 0.5 = -10 point penalty.",
+      difficulty: 'basic', concept: 'luxuryTax' },
+    // INTERMEDIATE difficulty
+    { question: "A player has 6.0 projected WAR and 40% injury risk. What is their expected WAR?",
+      options: ["6.0 — WAR doesn't change", "3.6 — multiply WAR by healthy probability", "2.4 — multiply WAR by risk", "4.0 — subtract the risk percentage"],
+      correctIndex: 1, explanation: "Expected WAR = WAR x (1 - risk). 6.0 x 0.60 = 3.6. You multiply by the probability they STAY healthy.",
+      difficulty: 'intermediate', concept: 'expectedValue' },
+    { question: "You spend $45M on a veteran. Next summer, a young superstar hits free agency at $20M. What concept describes what you lost?",
+      options: ["Sunk cost", "Opportunity cost", "Supply and demand", "Diminishing returns"],
+      correctIndex: 1, explanation: "Opportunity cost — by committing $45M now, you can't afford the $20M superstar later. Every dollar spent is a dollar unavailable for future moves.",
+      difficulty: 'intermediate', concept: 'opportunityCost' },
+    { question: "Two pitchers: Pitcher A has 4.0 WAR, $4M salary. Pitcher B has 5.0 WAR, $22M salary. Your budget is tight. Who should you sign?",
+      options: ["Pitcher B — more WAR is always better", "Pitcher A — $1M/WAR vs $4.4M/WAR, reinvest the $18M savings", "Neither — find a free agent", "Pitcher B — the extra 1.0 WAR is worth it"],
+      correctIndex: 1, explanation: "Pitcher A at $1M/WAR is elite value. The $18M saved can buy ~4-5 additional WAR elsewhere. Total roster WAR is what matters, not individual WAR.",
+      difficulty: 'intermediate', concept: 'valueOverReplacement' },
+    { question: "What does the 'age curve' tell us about a 35-year-old player's likely trajectory?",
+      options: ["They'll maintain current production", "They're likely to improve with experience", "They're likely to decline significantly each year", "Age doesn't predict performance"],
+      correctIndex: 2, explanation: "Research shows players decline ~0.8 WAR/year after 33 and ~1.0 WAR/year after 36. A 35-year-old with 4.0 WAR projects ~3.2 next year and ~2.4 the year after.",
+      difficulty: 'intermediate', concept: 'ageCurve' },
+    { question: "A player had a breakout 2023 season (8.0 WAR) after 5 years of 4.0 WAR. Which projection is most analytically defensible for next year?",
+      options: ["8.0+ WAR — he's broken out", "~5.0 WAR — regression toward his career mean", "4.0 WAR — one great year means nothing", "Impossible to predict"],
+      correctIndex: 1, explanation: "Regression to the mean: extreme one-year performances typically move back toward career averages. Smart GMs discount outlier seasons when projecting.",
+      difficulty: 'intermediate', concept: 'expectedValue' },
     { question: "Your roster has 5 players with 10-15% injury risk and 4 players with 30%+ risk. What's the biggest concern?",
       options: ["Not enough star power", "Too many high-risk players could collapse your expected WAR", "The low-risk players are boring", "Injury risk doesn't matter over a full season"],
-      correctIndex: 1, explanation: "With 4 high-risk players, there's a very high probability at least 1-2 get hurt. Your expected roster WAR drops significantly. Diversifying risk protects your floor." }
+      correctIndex: 1, explanation: "With 4 high-risk players, there's a very high probability at least 1-2 get hurt. Your expected roster WAR drops significantly. Diversifying risk protects your floor.",
+      difficulty: 'intermediate', concept: 'expectedValue' },
+    // ADVANCED difficulty
+    { question: "You can sign a 25-year-old (5.0 WAR) or a 33-year-old (6.0 WAR) to a 5-year deal. Who gives more total value?",
+      options: ["The 33-year-old — 6.0 WAR is higher right now", "The 25-year-old — their WAR grows while the veteran's declines", "Whichever costs less", "The older player is always safer"],
+      correctIndex: 1, explanation: "The 25-year-old's WAR improves each year (5.0 > 5.3 > 5.6...) while the 33-year-old declines (6.0 > 5.2 > 4.4...). Over 5 years, youth wins.",
+      difficulty: 'advanced', concept: 'ageCurve' },
+    { question: "A team's playoff probability model shows 85% odds at 92 wins and 40% at 88 wins. You can upgrade from 88 to 92 wins for $40M. What's the value of this move?",
+      options: ["Worth it — any playoff improvement is valuable", "The 45% probability gain must exceed the $40M cost", "Not worth it — four wins for $40M is too expensive", "Impossible to calculate without more data"],
+      correctIndex: 1, explanation: "The 45 percentage-point playoff probability gain must be monetized (ticket sales, etc.) and compared to $40M. This is playoff probability curve analysis — the math drives the decision.",
+      difficulty: 'advanced', concept: 'expectedValue' },
+    { question: "A shortstop and a DH both project for 5.0 WAR. Who should you value higher in the free agent market?",
+      options: ["The DH — more offensive upside", "The shortstop — positional scarcity makes his production harder to replace", "They're identical in value", "The one with better advanced metrics"],
+      correctIndex: 1, explanation: "Positional scarcity matters: 5.0 WAR at shortstop (premium defensive position) is rarer and harder to replace than 5.0 WAR from a DH slot. Scarcity commands a premium.",
+      difficulty: 'advanced', concept: 'valueOverReplacement' },
+    { question: "A player earns $30M/yr on a 10-year contract. At year 7, he's producing 1.5 WAR (down from his prime 5.0 WAR). What's the WORST thing to do?",
+      options: ["Keep starting him based on name recognition", "Trade him accepting a salary dump", "Release him — eat the remaining $90M", "All of these are equally bad"],
+      correctIndex: 0, explanation: "Starting a 1.5 WAR player because 'we paid $30M' is the sunk cost fallacy in action. The contract is already signed. Play decisions should be based on current production, not past investment.",
+      difficulty: 'advanced', concept: 'opportunityCost' },
+    { question: "Your analytics model projects a player at 6.0 WAR. The player's agent claims he's worth 8.0 WAR based on traditional stats. What's the analytically correct response?",
+      options: ["Trust your model — traditional stats miss important production factors", "Trust the agent — traditional stats are proven over decades", "Average the two — 7.0 WAR is a reasonable compromise", "Offer exactly 7.0 WAR to signal good faith"],
+      correctIndex: 0, explanation: "Your model should incorporate advanced metrics (WAR, xFIP, exit velocity, etc.) that capture true production. Traditional counting stats like RBIs are context-dependent and misleading for valuation.",
+      difficulty: 'advanced', concept: 'valueOverReplacement' },
+    { question: "A 28-year-old signed a 6-year extension at $20M/yr. By year 5, he's 33 and declining. What does this teach about contract structure?",
+      options: ["Extensions are always bad investments", "Long contracts carry back-loading risk as players decline into the final years", "The team overpaid from day one", "Players should never sign extensions"],
+      correctIndex: 1, explanation: "Contract analysis: players earn their deal in early years but often decline into the back end. Smart GMs price in this decline curve when negotiating length and average annual value.",
+      difficulty: 'advanced', concept: 'contractAnalysis' }
 ];
 
 // ========================================
@@ -1861,7 +2047,18 @@ const ACHIEVEMENTS = [
     { id: 'quiz_ace', name: "Quiz Ace", emoji: "\u{1F4AF}", test: (r) => r.quizScore === 3 },
     { id: 'survivor', name: "Survivor", emoji: "\u{1F9BE}", test: (r) => r.injuryCount >= 2 && r.finalEfficiency >= 75 },
     { id: 'grand_slam', name: "Grand Slam", emoji: "\u{1F48E}", test: (r) => r.finalEfficiency >= 90 },
-    { id: 'complete_gm', name: "Complete GM", emoji: "\u{1F451}", test: (r) => r.unlockedCount >= 11 }
+    { id: 'complete_gm', name: "Complete GM", emoji: "\u{1F451}", test: (r) => r.unlockedCount >= 21 },
+    // New achievements
+    { id: 'albatross_avoider', name: "Albatross Avoider", emoji: "\u{1F9F9}", test: (r) => !r.hasTrapOrAlbatross },
+    { id: 'speed_run', name: "Speed Run", emoji: "\u26A1", test: (r) => r.gameDuration < 240 },
+    { id: 'the_bill_james', name: "The Bill James", emoji: "\u{1F4D1}", test: (r) => r.allScouted === true },
+    { id: 'perfect_draft', name: "Perfect Draft", emoji: "\u{1F3AF}", test: (r) => r.finalEfficiency >= 90 && !r.hasPenaltySynergy },
+    { id: 'rookie_gm', name: "Rookie GM", emoji: "\u{1F51E}", test: (r) => r.totalGamesPlayed === 0 },
+    { id: 'the_rebuilder', name: "The Rebuilder", emoji: "\u{1F6A7}", test: (r) => r.mandate === 'youth' && r.maxAge <= 26 },
+    { id: 'insurance_policy', name: "Insurance Policy", emoji: "\u{1F6E1}", test: (r) => r.avgRisk < 12 },
+    { id: 'market_disruptor', name: "Market Disruptor", emoji: "\u{1F4A1}", test: (r) => r.avgCPW < 3 },
+    { id: 'against_the_media', name: "Against the Media", emoji: "\u{1F4F0}", test: (r) => r.gemOrCheapHeadlineCount >= 4 && r.isGreenZone },
+    { id: 'veteran_mastermind', name: "Veteran Mastermind", emoji: "\u{1F9D3}", test: (r) => r.mandate === 'veteran' && r.finalEfficiency >= 80 }
 ];
 
 // ========================================
@@ -1933,8 +2130,12 @@ const state = {
     scoutTokens: 8,
     scouted: {},
     simResults: null,
+    simLog: [],
     gamePhase: 'drafting',
     rivalPicks: [],
+    rivalName: 'Metro Stars',
+    rivalGMName: 'GM Riley Cross',
+    gameStartTime: null,
     headlines: [],
     compareMode: false,
     compareSlots: [null, null],
@@ -1945,6 +2146,15 @@ const state = {
     postSimEfficiency: 0,
     achievements: JSON.parse(localStorage.getItem('gm_achievements') || '[]')
 };
+
+// Rival team personality pool
+const RIVAL_TEAMS = [
+    { name: 'Metro Stars', gm: 'GM Riley Cross' },
+    { name: 'Brooklyn Analytics', gm: 'GM Sarah Chen' },
+    { name: 'Bay City Capitals', gm: 'GM Marcus Webb' },
+    { name: 'Lakefront Legends', gm: 'GM Diana Torres' },
+    { name: 'Steel City Surge', gm: 'GM Kevin Park' }
+];
 
 // ========================================
 // 3-YEAR PROJECTION
@@ -2086,77 +2296,92 @@ function getSortCPW(player) {
 // ========================================
 // RENDER PLAYER CARDS
 // ========================================
+const TIER_LABELS = { elite: 'ELITE', value: 'VALUE', trap: 'TRAP', gem: 'GEM', albatross: 'ALBATROSS' };
+
+function buildCardHTML(p, totalSalary, effectiveBudget, cardIndex) {
+    const isSelected = state.selected.has(p.id);
+    const isRival = state.rivalPicks.includes(p.id);
+    const wouldExceed = !isSelected && (totalSalary + p.salary > effectiveBudget);
+    const rosterFull = !isSelected && state.selected.size >= state.maxRoster;
+    const disabled = !isSelected && !isRival && (wouldExceed || rosterFull);
+    const warScouted = isWarScouted(p.id);
+    const riskScouted = isRiskScouted(p.id);
+    const fullScouted = isFullyScouted(p.id);
+
+    const warDisplay = getDisplayWAR(p);
+    const riskDisplay = getDisplayRisk(p);
+    const cpwDisplay = getDisplayCPW(p);
+    const cpwNum = warScouted ? (p.salary / p.war) : (p.salary / ((p.warRange[0]+p.warRange[1])/2));
+    const warColor = warScouted ? (p.war >= 6 ? 'var(--accent-green)' : p.war >= 4 ? 'var(--accent-blue)' : 'var(--text-primary)') : 'var(--text-secondary)';
+    const riskColor = riskScouted ? (p.injuryRisk >= 30 ? 'var(--accent-red)' : p.injuryRisk >= 20 ? 'var(--accent-amber)' : 'var(--accent-green)') : 'var(--text-secondary)';
+
+    const cardClick = state.compareMode ? `addToCompare(${p.id})` : `togglePlayer(${p.id})`;
+    const tierLabel = TIER_LABELS[p.tier] || p.tier.toUpperCase();
+    const animStyle = firstRender ? `style="animation: cardSlideIn 0.3s ease both; animation-delay: ${Math.min(cardIndex, 20) * 0.04}s;"` : '';
+
+    return `
+    <div class="player-card tier-${p.tier} ${isSelected ? 'selected' : ''} ${disabled ? 'disabled' : ''} ${isRival ? 'rival-taken' : ''}"
+         onclick="${cardClick}" data-id="${p.id}" tabindex="0"
+         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();${cardClick};}" ${animStyle}>
+        <div class="card-tier-accent"></div>
+        <span class="tier-pill tier-${p.tier}" aria-label="${tierLabel} tier">${tierLabel}</span>
+        <div class="card-body">
+            <div class="card-top">
+                <div class="card-avatar">${getInitials(p.name)}</div>
+                <div class="card-name-block">
+                    <div class="card-name">${p.name}</div>
+                    <div class="card-meta">
+                        <span class="pos-badge">${p.position}</span>
+                        <span>Age ${p.age}</span>
+                        <span>${p.contractYears}yr</span>
+                        ${fullScouted ? '<span class="scouted-badge">SCOUTED</span>' : ''}
+                    </div>
+                </div>
+                <div class="card-select-indicator"></div>
+            </div>
+            <div class="card-stats">
+                <div class="card-stat">
+                    <div class="card-stat-label">WAR</div>
+                    <div class="card-stat-value ${!warScouted ? 'blurred-stat' : ''}" style="color: ${warColor}; font-size: ${warScouted ? '15px' : '13px'}">${warDisplay}</div>
+                    ${warScouted ? renderSparkline(p) : ''}
+                </div>
+                <div class="card-stat">
+                    <div class="card-stat-label">Salary</div>
+                    <div class="card-stat-value">$${p.salary}M</div>
+                </div>
+                <div class="card-stat">
+                    <div class="card-stat-label">Risk</div>
+                    <div class="card-stat-value" style="color: ${riskColor}; font-size: ${riskScouted ? '15px' : '12px'}">${riskDisplay}</div>
+                </div>
+                <div class="card-stat">
+                    <div class="card-stat-label">Contract</div>
+                    <div class="card-stat-value" style="font-size:13px">${p.contractYears}yr</div>
+                </div>
+            </div>
+            <div class="card-bottom">
+                <span class="card-cpw ${getCPWClass(cpwNum)}">${cpwDisplay}</span>
+                <span class="card-stars">${renderStars(p.fanAppeal)}</span>
+            </div>
+            ${(warScouted && p.scout) ? `<div class="card-scout">"${p.scout}"</div>` : ''}
+            ${(!fullScouted && state.scoutTokens > 0) ? `
+            <div class="card-actions">
+                ${!warScouted ? `<button class="scout-btn" aria-label="Full scout for ${p.name}" onclick="scoutPlayer(${p.id},'war',event)">\u{1F50D} Full Scout</button>` : ''}
+                ${!riskScouted ? `<button class="scout-btn" aria-label="Risk assessment for ${p.name}" onclick="scoutPlayer(${p.id},'risk',event)">\u{1F3E5} Medical</button>` : ''}
+            </div>` : (!fullScouted ? `
+            <div class="card-actions">
+                ${!warScouted ? `<button class="scout-btn" disabled style="opacity:0.4" title="No tokens remaining">\u{1F50D} Full Scout</button>` : ''}
+                ${!riskScouted ? `<button class="scout-btn" disabled style="opacity:0.4" title="No tokens remaining">\u{1F3E5} Medical</button>` : ''}
+            </div>` : '')}
+        </div>
+    </div>`;
+}
+
 function renderCards(players) {
     const grid = document.getElementById('playerGrid');
     const totalSalary = getTotalSalary();
     const effectiveBudget = state.budget;
-    grid.innerHTML = players.map(p => {
-        const isSelected = state.selected.has(p.id);
-        const isRival = state.rivalPicks.includes(p.id);
-        const wouldExceed = !isSelected && (totalSalary + p.salary > effectiveBudget);
-        const rosterFull = !isSelected && state.selected.size >= state.maxRoster;
-        const disabled = !isSelected && !isRival && (wouldExceed || rosterFull);
-        const warScouted = isWarScouted(p.id);
-        const riskScouted = isRiskScouted(p.id);
-        const fullScouted = isFullyScouted(p.id);
-
-        const warDisplay = getDisplayWAR(p);
-        const riskDisplay = getDisplayRisk(p);
-        const cpwDisplay = getDisplayCPW(p);
-        const cpwNum = warScouted ? (p.salary / p.war) : (p.salary / ((p.warRange[0]+p.warRange[1])/2));
-        const warColor = warScouted ? (p.war >= 6 ? 'var(--accent-green)' : p.war >= 4 ? 'var(--accent-blue)' : 'var(--text-primary)') : 'var(--text-secondary)';
-        const riskColor = riskScouted ? (p.injuryRisk >= 30 ? 'var(--accent-red)' : p.injuryRisk >= 20 ? 'var(--accent-amber)' : 'var(--accent-green)') : 'var(--text-secondary)';
-
-        const cardClick = state.compareMode ?
-            `addToCompare(${p.id})` :
-            `togglePlayer(${p.id})`;
-
-        return `
-        <div class="player-card tier-${p.tier} ${isSelected ? 'selected' : ''} ${disabled ? 'disabled' : ''} ${isRival ? 'rival-taken' : ''}"
-             onclick="${cardClick}" data-id="${p.id}">
-            <div class="card-tier-accent"></div>
-            <div class="card-body">
-                <div class="card-top">
-                    <div class="card-avatar">${getInitials(p.name)}</div>
-                    <div class="card-name-block">
-                        <div class="card-name">${p.name}</div>
-                        <div class="card-meta">
-                            <span class="pos-badge">${p.position}</span>
-                            <span>Age ${p.age}</span>
-                            <span>${p.contractYears}yr</span>
-                            ${fullScouted ? '<span class="scouted-badge">SCOUTED</span>' : ''}
-                        </div>
-                    </div>
-                    <div class="card-select-indicator"></div>
-                </div>
-                <div class="card-stats">
-                    <div class="card-stat">
-                        <div class="card-stat-label">WAR</div>
-                        <div class="card-stat-value ${!warScouted ? 'blurred-stat' : ''}" style="color: ${warColor}; font-size: ${warScouted ? '15px' : '13px'}">${warDisplay}</div>
-                        ${warScouted ? renderSparkline(p) : ''}
-                    </div>
-                    <div class="card-stat">
-                        <div class="card-stat-label">Salary</div>
-                        <div class="card-stat-value">$${p.salary}M</div>
-                    </div>
-                    <div class="card-stat">
-                        <div class="card-stat-label">Risk</div>
-                        <div class="card-stat-value ${!riskScouted ? '' : ''}" style="color: ${riskColor}; font-size: ${riskScouted ? '15px' : '12px'}">${riskDisplay}</div>
-                    </div>
-                </div>
-                <div class="card-bottom">
-                    <span class="card-cpw ${getCPWClass(cpwNum)}">${cpwDisplay}</span>
-                    <span class="card-stars">${renderStars(p.fanAppeal)}</span>
-                </div>
-                ${(warScouted && p.scout) ? `<div class="card-scout">"${p.scout}"</div>` : ''}
-                ${(!fullScouted && state.scoutTokens > 0) ? `
-                <div class="card-actions">
-                    ${!warScouted ? `<button class="scout-btn" onclick="scoutPlayer(${p.id},'war',event)">\u{1F50D} Full Scout</button>` : ''}
-                    ${!riskScouted ? `<button class="scout-btn" onclick="scoutPlayer(${p.id},'risk',event)">\u{1F3E5} Medical</button>` : ''}
-                </div>` : ''}
-            </div>
-        </div>`;
-    }).join('');
+    grid.innerHTML = players.map((p, i) => buildCardHTML(p, totalSalary, effectiveBudget, i)).join('');
+    firstRender = false;
 }
 
 // ========================================
@@ -2180,6 +2405,10 @@ function togglePlayer(id) {
         if (state.mandate && state.mandate.hardCaps) {
             if (state.mandate.hardCaps.maxAge && player.age > state.mandate.hardCaps.maxAge) {
                 showToast(`\u{1F6AB} ${state.mandate.name}: No players over age ${state.mandate.hardCaps.maxAge}!`);
+                return;
+            }
+            if (state.mandate.hardCaps.noElite && player.tier === 'elite') {
+                showToast(`\u{1F6AB} ${state.mandate.name}: No Elite-tier players allowed on this budget!`);
                 return;
             }
         }
@@ -2232,8 +2461,8 @@ function calculateMetrics() {
     // WAR Score
     const warScore = Math.min(100, (totalWAR / 40) * 100);
 
-    // Value Score
-    const valueScore = Math.max(0, Math.min(100, (12 - avgCPW) / 6 * 100));
+    // Value Score (breakeven at $10M/WAR, 100 pts at $2M/WAR)
+    const valueScore = Math.max(0, Math.min(100, (10 - avgCPW) / 8 * 100));
 
     // Risk Score
     const highRiskCount = sel.filter(p => p.injuryRisk >= 30).length;
@@ -2245,17 +2474,24 @@ function calculateMetrics() {
     const youngCount = sel.filter(p => p.age < 26).length;
     if (youngCount >= 2) ageScore = Math.min(100, ageScore + 10);
 
-    // Chemistry Score
+    // Depth Score (replaces Chemistry Score — measures roster construction quality)
     let chemScore = 0;
-    const hasSuperstar = sel.some(p => p.fanAppeal === 5);
-    if (hasSuperstar) chemScore += 30;
-    const positions = new Set(sel.map(p => p.position.split('/')[0]));
-    if (positions.size >= 5) chemScore += 40;
-    else if (positions.size >= 4) chemScore += 25;
-    else if (positions.size >= 3) chemScore += 15;
-    const oldCount = sel.filter(p => p.age > 32).length;
-    if (oldCount <= 2) chemScore += 30;
-    else if (oldCount <= 3) chemScore += 15;
+    // +30 for all 4 position groups filled (C, SP, OF, IF)
+    const posGroupsFilled = new Set(sel.map(p => p.posGroup));
+    if (posGroupsFilled.has('C') && posGroupsFilled.has('SP') && posGroupsFilled.has('OF') && posGroupsFilled.has('IF')) chemScore += 30;
+    // +25 for age diversity (has player ≤25 AND player in prime 28-32)
+    const hasYoungPlayer = sel.some(p => p.age <= 25);
+    const hasPrimePlayer = sel.some(p => p.age >= 28 && p.age <= 32);
+    if (hasYoungPlayer && hasPrimePlayer) chemScore += 25;
+    // +25 for contract length balance (short deal ≤2yr AND long deal ≥5yr)
+    const hasShortDeal = sel.some(p => p.contractYears <= 2);
+    const hasLongDeal = sel.some(p => p.contractYears >= 5);
+    if (hasShortDeal && hasLongDeal) chemScore += 25;
+    // +20 for positive tier mix (Elite+Gem or Value+Gem, no Trap/Albatross players)
+    const hasTrapPlayer = sel.some(p => p.tier === 'trap' || p.tier === 'albatross');
+    const hasEliteOrValue = sel.some(p => p.tier === 'elite' || p.tier === 'value');
+    const hasGemPlayer = sel.some(p => p.tier === 'gem');
+    if (!hasTrapPlayer && hasEliteOrValue && hasGemPlayer) chemScore += 20;
 
     // Fan Score (for Brand mandate)
     let fanScore = 0;
@@ -2290,6 +2526,18 @@ function calculateMetrics() {
             const eliteCount = sel.filter(p => p.tier === 'elite').length;
             if (eliteCount < hc.minElite && n === 9) efficiency = Math.min(efficiency, 60);
         }
+        if (hc.noElite) {
+            const eliteCount = sel.filter(p => p.tier === 'elite').length;
+            if (eliteCount > 0 && n === 9) efficiency = Math.min(efficiency, 50);
+        }
+        if (hc.minVets && n === 9) {
+            const vetCount = sel.filter(p => p.age >= 31).length;
+            if (vetCount < hc.minVets) efficiency = Math.min(efficiency, hc.capAt || 60);
+        }
+        if (hc.minSP && n === 9) {
+            const spCount = sel.filter(p => p.posGroup === 'SP').length;
+            if (spCount < hc.minSP) efficiency = Math.min(efficiency, hc.capAt || 55);
+        }
     }
 
     efficiency = Math.max(0, Math.min(100, Math.round(efficiency)));
@@ -2314,24 +2562,41 @@ function updateDashboard(m) {
     let budgetStr = `$${m.totalSalary.toFixed(1)}M / $${state.budget}M`;
     if (m.luxuryTax > 0) budgetStr += ` <span class="tax-penalty-text">(Tax: -${m.luxuryTax.toFixed(1)} pts)</span>`;
     budgetText.innerHTML = budgetStr;
+    // Update luxury tax marker position dynamically (hides in Moneyball mode where budget < $160M)
+    const marker = document.getElementById('luxuryTaxMarker');
+    if (marker) {
+        if (state.budget >= 160) {
+            marker.style.left = ((160 / state.budget) * 100) + '%';
+            marker.style.display = '';
+        } else {
+            marker.style.display = 'none';
+        }
+    }
 
     // Roster count
     document.getElementById('rosterCount').textContent = n;
 
-    // Owner mood
+    // Owner mood (emoji + text label)
     const mood = document.getElementById('ownerMood');
-    if (n === 0) { mood.textContent = '\u{1F610}'; mood.dataset.tip = 'Owner is waiting...'; }
+    const moodEmoji = document.getElementById('moodEmoji');
+    const moodLabel = document.getElementById('moodLabel');
+    function setMood(emoji, tip, label) {
+        if (moodEmoji) moodEmoji.textContent = emoji;
+        if (moodLabel) moodLabel.textContent = label;
+        if (mood) { mood.dataset.tip = tip; mood.setAttribute('aria-label', 'Owner mood: ' + label); }
+    }
+    if (n === 0) { setMood('\u{1F610}', 'Owner is waiting...', 'Owner: Neutral'); }
     else if (n < 9) {
-        if (m.efficiency < 30) { mood.textContent = '\u{1F621}'; mood.dataset.tip = 'Owner is furious'; }
-        else if (m.efficiency < 50) { mood.textContent = '\u{1F61F}'; mood.dataset.tip = 'Owner is worried'; }
-        else if (m.efficiency < 65) { mood.textContent = '\u{1F914}'; mood.dataset.tip = 'Owner is thinking...'; }
-        else if (m.efficiency < 75) { mood.textContent = '\u{1F60A}'; mood.dataset.tip = 'Owner is hopeful'; }
-        else { mood.textContent = '\u{1F60E}'; mood.dataset.tip = 'Owner is impressed!'; }
+        if (m.efficiency < 30) setMood('\u{1F621}', 'Owner is furious', 'Owner: Furious');
+        else if (m.efficiency < 50) setMood('\u{1F61F}', 'Owner is worried', 'Owner: Worried');
+        else if (m.efficiency < 65) setMood('\u{1F914}', 'Owner is thinking...', 'Owner: Thinking');
+        else if (m.efficiency < 75) setMood('\u{1F60A}', 'Owner is hopeful', 'Owner: Hopeful');
+        else setMood('\u{1F60E}', 'Owner is impressed!', 'Owner: Impressed');
     } else {
         const gz = state.mandate ? state.mandate.greenZone : 75;
-        if (m.efficiency >= gz) { mood.textContent = '\u{1F929}'; mood.dataset.tip = 'Owner is ECSTATIC!'; }
-        else if (m.efficiency >= 60) { mood.textContent = '\u{1F60A}'; mood.dataset.tip = 'Owner sees potential'; }
-        else { mood.textContent = '\u{1F612}'; mood.dataset.tip = 'Owner wants a meeting...'; }
+        if (m.efficiency >= gz) setMood('\u{1F929}', 'Owner is ECSTATIC!', 'Owner: Ecstatic');
+        else if (m.efficiency >= 60) setMood('\u{1F60A}', 'Owner sees potential', 'Owner: Hopeful');
+        else setMood('\u{1F612}', 'Owner wants a meeting...', 'Owner: Disappointed');
     }
 
     // Stats
@@ -2458,22 +2723,45 @@ function animateValue(elId, target, decimals) {
 // ========================================
 // RIVAL GM
 // ========================================
+function getRivalScoreFn(mandateId) {
+    switch (mandateId) {
+        case 'win_now':
+            return (p) => p.war * 0.7 + (p.war / p.salary) * 0.3;
+        case 'moneyball':
+            return (p) => (p.war / p.salary) * 0.8 + p.war * 0.2;
+        case 'brand':
+            return (p) => p.fanAppeal * 0.4 + p.war * 0.4 + (p.war / p.salary) * 0.2;
+        case 'youth':
+            return (p) => p.age >= 30 ? 0 : p.war * ((35 - p.age) / 20);
+        case 'protect':
+            return (p) => ((100 - p.injuryRisk) / 100) * 0.5 + p.war * 0.3 + (p.war / p.salary) * 0.2;
+        case 'championship':
+            return (p, pickIndex) => pickIndex < 2 && p.tier !== 'elite' ? -1 : p.war * 0.7 + (p.war / p.salary) * 0.3;
+        default:
+            return (p) => (1 / (p.salary / p.war)) * 0.6 + p.war * 0.4;
+    }
+}
+
 function rivalGMPick() {
     const available = PLAYERS.filter(p => !state.selected.has(p.id) && !state.rivalPicks.includes(p.id));
     if (available.length === 0) return;
-    // AI: 60% $/WAR efficiency + 40% raw WAR
+
+    const mandateId = state.mandate ? state.mandate.id : null;
+    const scoreFn = getRivalScoreFn(mandateId);
+    const pickIndex = state.rivalPicks.length;
+
     available.sort((a, b) => {
-        const aScore = (1 / (a.salary / a.war)) * 0.6 + a.war * 0.4;
-        const bScore = (1 / (b.salary / b.war)) * 0.6 + b.war * 0.4;
+        const aScore = scoreFn(a, pickIndex);
+        const bScore = scoreFn(b, pickIndex);
         return bScore - aScore;
     });
     const pick = available[0];
     state.rivalPicks.push(pick.id);
 
-    // Show banner
+    // Show banner with rival name and GM
     const banner = document.getElementById('rivalBanner');
     document.getElementById('rivalBannerText').textContent =
-        `The Metro Stars have signed ${pick.name} to a ${pick.contractYears}-year, $${(pick.salary * pick.contractYears).toFixed(0)}M deal!`;
+        `The ${state.rivalName} (${state.rivalGMName}) have signed ${pick.name} to a ${pick.contractYears}-year, $${(pick.salary * pick.contractYears).toFixed(0)}M deal!`;
     banner.classList.add('show');
     setTimeout(() => banner.classList.remove('show'), 3500);
 
@@ -2499,7 +2787,7 @@ function generateHeadline(player) {
         templates = HEADLINES.young_roster;
     } else if (player.tier === 'elite') {
         templates = HEADLINES.elite_sign;
-    } else if (player.tier === 'trap') {
+    } else if (player.tier === 'trap' || player.tier === 'albatross') {
         templates = HEADLINES.trap_sign;
     } else if (player.tier === 'gem') {
         if (player.war >= 5 && player.salary <= 5) {
@@ -2608,6 +2896,7 @@ function startSimulation(preSimMetrics) {
     state.gamePhase = 'simulating';
     const sel = getSelectedPlayers();
     state.simResults = {};
+    state.simLog = [];
 
     // Roll outcomes
     sel.forEach(p => {
@@ -2616,16 +2905,45 @@ function startSimulation(preSimMetrics) {
         const effectiveRisk = Math.min(80, p.injuryRisk * riskMod);
         const roll = Math.random() * 100;
 
-        if (roll < effectiveRisk) {
-            // Injury
-            const factor = 0.3 + Math.random() * 0.2;
-            state.simResults[p.id] = { type: 'injury', actualWAR: parseFloat((p.war * factor).toFixed(1)), headline: p.injuryHeadline };
-        } else if (p.age <= 26 && p.injuryRisk <= 15 && Math.random() < 0.25) {
-            // Breakout
-            state.simResults[p.id] = { type: 'breakout', actualWAR: parseFloat((p.war + 1.0).toFixed(1)), headline: p.breakoutHeadline };
+        // Check for regression (older players)
+        const regressionRoll = Math.random();
+        if (p.age >= 33 && regressionRoll < 0.15 && roll >= effectiveRisk) {
+            // Regression outcome
+            state.simResults[p.id] = { type: 'regression', actualWAR: parseFloat((p.war * 0.75).toFixed(1)), headline: `${p.name} showing signs of decline — production dipping below projections.` };
+        } else if (roll < effectiveRisk) {
+            // Injury — 3-tier severity
+            const severity = roll / effectiveRisk;
+            let factor, headline, injType;
+            if (severity < 0.4) {
+                // Mild
+                factor = 0.7;
+                injType = 'injury mild';
+                headline = `Day-to-day: ${p.injuryHeadline}${!isScouted ? ' (Unscouted — risk was unknown)' : ''}`;
+            } else if (severity < 0.8) {
+                // Moderate
+                factor = 0.45;
+                injType = 'injury';
+                headline = `${p.injuryHeadline}${!isScouted ? ' (Unscouted — risk was unknown)' : ''}`;
+            } else {
+                // Severe
+                factor = 0.15;
+                injType = 'injury severe';
+                headline = `${p.injuryHeadline} — Season over.${!isScouted ? ' (Unscouted — risk was unknown)' : ''}`;
+            }
+            state.simResults[p.id] = { type: injType, actualWAR: parseFloat((p.war * factor).toFixed(1)), headline };
         } else {
-            // Steady
-            state.simResults[p.id] = { type: 'steady', actualWAR: p.war, headline: `Steady as expected \u2014 ${p.name} delivering projected production.` };
+            // Determine breakout chance (expanded conditions)
+            let breakoutChance = 0;
+            if (p.age <= 27 && p.injuryRisk <= 20) breakoutChance = 0.20;
+            else if (p.age <= 30 && p.injuryRisk <= 15 && p.tier === 'gem') breakoutChance = 0.12;
+
+            if (Math.random() < breakoutChance) {
+                // Breakout
+                state.simResults[p.id] = { type: 'breakout', actualWAR: parseFloat((p.war + 1.0).toFixed(1)), headline: p.breakoutHeadline };
+            } else {
+                // Steady
+                state.simResults[p.id] = { type: 'steady', actualWAR: p.war, headline: `Steady as expected \u2014 ${p.name} delivering projected production.` };
+            }
         }
     });
 
@@ -2667,6 +2985,8 @@ function startSimulation(preSimMetrics) {
         div.textContent = result.headline;
         ticker.appendChild(div);
         ticker.scrollTop = ticker.scrollHeight;
+        // Persist to sim log
+        state.simLog.push({ playerName: p.name, type: result.type, headline: result.headline, actualWAR: result.actualWAR });
 
         eventIndex++;
 
@@ -2703,8 +3023,9 @@ function showTradeDeadline(sel, eventIndex, eventsPerPhase, phases) {
 
     let rosterHTML = sel.map(p => {
         const sr = state.simResults[p.id];
-        const warStr = sr ? `${sr.actualWAR} WAR${sr.type === 'injury' ? ' (HURT)' : sr.type === 'breakout' ? ' (HOT)' : ''}` : `${p.war} WAR`;
-        const cls = sr && sr.type === 'injury' ? 'style="border-color: var(--accent-red);"' : '';
+        const isInjured = sr && (sr.type === 'injury' || sr.type === 'injury mild' || sr.type === 'injury severe');
+        const warStr = sr ? `${sr.actualWAR} WAR${isInjured ? ' (HURT)' : sr.type === 'breakout' ? ' (HOT)' : sr.type === 'regression' ? ' (DECLINE)' : ''}` : `${p.war} WAR`;
+        const cls = isInjured ? 'style="border-color: var(--accent-red);"' : '';
         return `<div class="trade-player-item" ${cls} onclick="selectTradeDrop(${p.id})" id="tradeDrop${p.id}">
             <div class="tp-name">${p.name}</div>
             <div class="tp-stats">${p.position} | ${warStr} | $${p.salary}M</div>
@@ -2718,17 +3039,23 @@ function showTradeDeadline(sel, eventIndex, eventsPerPhase, phases) {
         </div>`
     ).join('');
 
+    // Contextual framing based on whether any player is injured
+    const anyInjured = sel.some(p => { const sr = state.simResults[p.id]; return sr && (sr.type === 'injury' || sr.type === 'injury mild' || sr.type === 'injury severe'); });
+    const tradeContext = anyInjured
+        ? 'Emergency acquisition — your roster took a hit. Make a move to stay competitive.'
+        : 'Stretch run rental — add a piece for the playoff push. Want to make a move?';
+
     tradeContent.innerHTML = `
         <div style="text-align:center; margin-bottom:12px;">
             <div style="font-size:28px;">\u{1F4E2}</div>
             <h2 style="justify-content:center;">Trade Deadline \u2014 July 31st</h2>
-            <p>You've seen how your roster is performing. Want to make a move? Swap 1 player for a $5M trade fee.</p>
+            <p>${tradeContext}</p>
         </div>
         <div class="trade-grid">
             <div class="trade-column"><h3>Your Roster (Drop 1)</h3>${rosterHTML}</div>
             <div class="trade-column"><h3>Available (Add 1)</h3>${availHTML}</div>
         </div>
-        <div class="trade-fee" id="tradeFeeText">Trade fee: $5M added to salary</div>
+        <div class="trade-fee" id="tradeFeeText">Select players to see trade cost</div>
         <div style="text-align:center; display:flex; gap:8px; justify-content:center;">
             <button class="trade-btn" id="executeTrade" disabled onclick="executeTrade()">Execute Trade</button>
             <button class="standpat-btn" onclick="standPat()">Stand Pat</button>
@@ -2759,13 +3086,16 @@ function checkTradeReady() {
     if (state._tradeDrop && state._tradeAdd) {
         const dropPlayer = getPlayer(state._tradeDrop);
         const addPlayer = getPlayer(state._tradeAdd);
-        const newSalary = getTotalSalary() - dropPlayer.salary + addPlayer.salary + 5;
+        // Dynamic trade fee: 30% of acquired player's annual salary
+        const tradeFee = Math.round(addPlayer.salary * 0.3);
+        const newSalary = getTotalSalary() - dropPlayer.salary + addPlayer.salary + tradeFee;
+        state._tradeFeeAmount = tradeFee;
         if (newSalary > state.budget) {
             btn.disabled = true;
-            document.getElementById('tradeFeeText').textContent = `Trade fee: $5M. New total: $${newSalary.toFixed(1)}M \u2014 OVER CAP!`;
+            document.getElementById('tradeFeeText').textContent = `Trade fee: $${tradeFee}M (30% of salary). New total: $${newSalary.toFixed(1)}M \u2014 OVER CAP!`;
         } else {
             btn.disabled = false;
-            document.getElementById('tradeFeeText').textContent = `Trade fee: $5M. New salary total: $${newSalary.toFixed(1)}M`;
+            document.getElementById('tradeFeeText').textContent = `Trade fee: $${tradeFee}M (30% of salary). New salary total: $${newSalary.toFixed(1)}M`;
         }
     }
 }
@@ -2774,12 +3104,27 @@ function executeTrade() {
     state.selected.delete(state._tradeDrop);
     state.selected.add(state._tradeAdd);
     state.tradeExecuted = true;
-    // Add trade fee as phantom salary adjustment (add $5M via a flag)
-    state._tradeFee = 5;
-    // Simulate the new player
+    // Dynamic trade fee
+    state._tradeFee = state._tradeFeeAmount || 5;
+    // Re-roll sim outcome for the acquired player (realistic, not automatic steady)
     const addP = getPlayer(state._tradeAdd);
-    state.simResults[addP.id] = { type: 'steady', actualWAR: addP.war, headline: `Trade acquisition ${addP.name} provides a spark off the bench.` };
-    showToast(`\u{1F504} Traded for ${addP.name}!`);
+    const isScouted = isFullyScouted(addP.id);
+    const riskMod = isScouted ? 1.0 : 1.3;
+    const effectiveRisk = Math.min(80, addP.injuryRisk * riskMod);
+    const roll = Math.random() * 100;
+    let tradeResult;
+    if (roll < effectiveRisk) {
+        tradeResult = { type: 'injury', actualWAR: parseFloat((addP.war * 0.4).toFixed(1)), headline: `Trade acquisition ${addP.name}: ${addP.injuryHeadline}` };
+    } else {
+        let breakoutChance = (addP.age <= 27 && addP.injuryRisk <= 20) ? 0.20 : (addP.age <= 30 && addP.injuryRisk <= 15 && addP.tier === 'gem') ? 0.12 : 0;
+        if (Math.random() < breakoutChance) {
+            tradeResult = { type: 'breakout', actualWAR: parseFloat((addP.war + 1.0).toFixed(1)), headline: `Trade acquisition ${addP.name} is on fire — ${addP.breakoutHeadline}` };
+        } else {
+            tradeResult = { type: 'steady', actualWAR: addP.war, headline: `Trade acquisition ${addP.name} provides a spark off the bench.` };
+        }
+    }
+    state.simResults[addP.id] = tradeResult;
+    showToast(`\u{1F504} Traded for ${addP.name}! ${tradeResult.type === 'injury' ? '\u26A0\uFE0F Uh oh...' : tradeResult.type === 'breakout' ? '\u{1F525} On fire!' : '\u2705 Steady contributor.'}`);
     document.getElementById('tradeModal').classList.remove('active');
     resumeSimulation();
 }
@@ -2815,6 +3160,10 @@ function resumeSimulation() {
             div.textContent = result.headline;
             ticker.appendChild(div);
             ticker.scrollTop = ticker.scrollHeight;
+            // Persist to sim log (avoid duplicates)
+            if (!state.simLog.find(e => e.playerName === p.name && e.type === result.type)) {
+                state.simLog.push({ playerName: p.name, type: result.type, headline: result.headline, actualWAR: result.actualWAR });
+            }
         }
         idx++;
         setTimeout(showNext, 500);
@@ -2828,9 +3177,24 @@ function resumeSimulation() {
 function startQuiz() {
     state.gamePhase = 'quiz';
     state.quizScore = 0;
-    // Pick 3 random questions
-    const shuffled = [...QUIZ_POOL].sort(() => Math.random() - 0.5);
-    state._quizQuestions = shuffled.slice(0, 3);
+    // Select 1 basic + 1 intermediate + 1 advanced question
+    // Moneyball mandate prioritizes valueOverReplacement and opportunityCost concepts
+    const mandateId = state.mandate ? state.mandate.id : null;
+    const priorityConcepts = mandateId === 'moneyball' ? ['valueOverReplacement', 'opportunityCost', 'luxuryTax'] : [];
+
+    function pickFromDifficulty(difficulty) {
+        const pool = QUIZ_POOL.filter(q => q.difficulty === difficulty);
+        // Prioritize mandate-relevant questions
+        const priority = pool.filter(q => priorityConcepts.includes(q.concept));
+        const candidates = priority.length > 0 ? priority : pool;
+        return candidates[Math.floor(Math.random() * candidates.length)];
+    }
+
+    state._quizQuestions = [
+        pickFromDifficulty('basic'),
+        pickFromDifficulty('intermediate'),
+        pickFromDifficulty('advanced')
+    ];
     state._quizIndex = 0;
     showQuizQuestion();
 }
@@ -2928,7 +3292,7 @@ function showFinalResult() {
     }
 
     // Injury count for achievements
-    const injuryCount = sel.filter(p => state.simResults[p.id] && state.simResults[p.id].type === 'injury').length;
+    const injuryCount = sel.filter(p => state.simResults[p.id] && (state.simResults[p.id].type === 'injury' || state.simResults[p.id].type === 'injury mild' || state.simResults[p.id].type === 'injury severe')).length;
 
     // Lessons
     let lessons = [];
@@ -3011,6 +3375,8 @@ function showFinalResult() {
     if (isGreen) spawnConfetti();
 
     // Save result and check achievements
+    const penaltySynergies = state.activeSynergies.filter(s => s.bonus < 0);
+    const gemOrCheapHeadlines = state.headlines.filter(h => h.includes('under-the-radar') || h.includes('bargain') || h.includes('crickets') || h.includes('puzzling')).length;
     const gameResult = {
         mandate: state.mandate ? state.mandate.id : 'none',
         mandateName: state.mandate ? state.mandate.name : 'Standard',
@@ -3021,10 +3387,18 @@ function showFinalResult() {
         avgRisk: simRisk,
         avgFan: sel.reduce((s,p)=>s+p.fanAppeal,0)/sel.length,
         totalWAR: preMetrics.totalWAR,
+        avgCPW: preMetrics.avgCPW,
         quizScore: state.quizScore,
         injuryCount: injuryCount,
         tradeImproved: state.tradeExecuted && postEff > state.preSimEfficiency,
         allScouted: sel.every(p => isFullyScouted(p.id)),
+        hasTrapOrAlbatross: sel.some(p => p.tier === 'trap' || p.tier === 'albatross'),
+        maxAge: sel.reduce((max, p) => Math.max(max, p.age), 0),
+        hasPenaltySynergy: penaltySynergies.length > 0,
+        gemOrCheapHeadlineCount: gemOrCheapHeadlines,
+        isGreenZone: isGreen,
+        gameDuration: state.gameStartTime ? Math.floor((Date.now() - state.gameStartTime) / 1000) : 999,
+        totalGamesPlayed: loadLeaderboard().length,
         rosterNames: sel.map(p => p.name),
         date: new Date().toISOString().slice(0, 10)
     };
@@ -3168,6 +3542,8 @@ function spawnConfetti() {
 // SORTING
 // ========================================
 let currentSort = 'default';
+let currentFilter = 'all';
+let firstRender = true;
 function getCurrentSort() {
     const sortFns = {
         default: (a, b) => a.tierOrder - b.tierOrder,
@@ -3177,11 +3553,19 @@ function getCurrentSort() {
         cpw: (a, b) => getSortCPW(a) - getSortCPW(b),
         fan: (a, b) => b.fanAppeal - a.fanAppeal || getSortWAR(b) - getSortWAR(a)
     };
-    return [...PLAYERS].sort(sortFns[currentSort] || sortFns.default);
+    // Apply filter then sort
+    const filtered = currentFilter === 'all' ? [...PLAYERS] : PLAYERS.filter(p => p.posGroup === currentFilter);
+    return filtered.sort(sortFns[currentSort] || sortFns.default);
 }
 function sortPlayers(key, btn) {
     currentSort = key;
-    document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.sort-group:first-child .sort-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderCards(getCurrentSort());
+}
+function filterPlayers(filter, btn) {
+    currentFilter = filter;
+    document.querySelectorAll('#filterGroup .sort-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     renderCards(getCurrentSort());
 }
@@ -3272,6 +3656,11 @@ function selectMandate() {
 // ========================================
 function startGame() {
     document.getElementById('introOverlay').classList.add('hidden');
+    // Assign random rival team personality
+    const rival = RIVAL_TEAMS[Math.floor(Math.random() * RIVAL_TEAMS.length)];
+    state.rivalName = rival.name;
+    state.rivalGMName = rival.gm;
+    state.gameStartTime = Date.now();
     selectMandate();
     updateEverything();
 }
